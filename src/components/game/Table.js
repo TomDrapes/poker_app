@@ -20,39 +20,36 @@ class Table extends Component {
 
     this.onUpdateDeck = this.onUpdateDeck.bind(this)
     this.onUpdateFlop = this.onUpdateFlop.bind(this)
-   // this.onUpdatePlayer = this.onUpdatePlayer.bind(this)
+    this.onUpdatePlayer = this.onUpdatePlayer.bind(this)
 
+    this.shuffle(this.state.deck)
     this.deal()
   }
 
   deal () {
-    console.log(this.state.deck)
     let p = this.state.players
     let deck = this.state.deck
     for(let i = 0 ; i < this.state.players.length; i++){
       for(let j = 0; j < 2; j++){
-        this.state.players[i].hand.push(deck[0])
+        p[i].hand.push(deck[0])
         deck.shift()
       }
     }
     this.onUpdateDeck(deck)
+    this.onUpdatePlayer(p)
   }
 
   shuffle (deck) {
-    return deck.sort(function (a, b) { return 0.5 - Math.random() })
+    this.onUpdateDeck(deck.sort(function (a, b) { return 0.5 - Math.random() }))
   }
 
   flop () {
-    let f = this.state.flop
-    let d = this.shuffle(this.state.deck)
-
-    for (let i = 0; i < 5; i++) {
-      f.push(d[0])
-      d.shift()
-    }
-    this.onUpdateDeck(d)
-    this.onUpdateFlop(f)
-    return f.map(x => x.card)
+    let flop = this.state.flop
+    let deck = this.state.deck
+    flop.push(deck[0])
+    deck.shift()
+    this.onUpdateDeck(deck)
+    this.onUpdateFlop(flop)
   }
 
   playersHand (player) {
@@ -70,11 +67,12 @@ class Table extends Component {
     this.props.onUpdateFlop(flop)
   }
 
-  /*onUpdatePlayer (players) {
+  onUpdatePlayer (players) {
     this.props.onUpdatePlayer(players)
-  }*/
+  } 
 
   render () {
+    console.log("render")
     return (
       <div className="table">
         <div className="gameWindow">
@@ -86,7 +84,7 @@ class Table extends Component {
           <div className="flopWrapper">
             <div className="flop">
               <Deck />
-              {this.flop()}
+              {this.state.flop.map(x => x.card)}
               <div className="clear" />
             </div>
           </div>
@@ -99,7 +97,7 @@ class Table extends Component {
               <div className="clear" />
               <div className="checkBtn">Check</div>
               <div className="foldBtn">Fold</div>
-              <div className="betBtn">Bet</div>
+              <div className="betBtn" onClick={() => this.flop()}>Bet</div>
               <div className="betAmount">$50</div>
             </div>
             <div className="clear" />
