@@ -2,9 +2,10 @@ import React, { Component } from 'react'
 import Card from './card'
 import Deck from './deck'
 import Chat from '../chat/chat'
-import connect from '../../../node_modules/react-redux/lib/connect/connect'
+import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { updateDeck } from '../../Actions/DeckActions'
+import { updateFlop } from '../../Actions/FlopActions'
 
 class Table extends Component {
   constructor (props) {
@@ -12,10 +13,11 @@ class Table extends Component {
 
     this.state = {
       deck: this.props.deck,
-      flop: []
+      flop: this.props.flop      
     }
 
     this.onUpdateDeck = this.onUpdateDeck.bind(this)
+    this.onUpdateFlop = this.onUpdateFlop.bind(this)
   }
 
   shuffle (deck) {
@@ -27,15 +29,20 @@ class Table extends Component {
     let d = this.shuffle(this.state.deck)
 
     for (let i = 0; i < 5; i++) {
-      f.push(d[0].card)
+      f.push(d[0])
       d.shift()
     }
     this.onUpdateDeck(d)
-    return f
+    this.onUpdateFlop(f)
+    return f.map(x => x.card)
   }
 
   onUpdateDeck (deck) {
     this.props.onUpdateDeck(deck)
+  }
+
+  onUpdateFlop (flop) {
+    this.props.onUpdateFlop(flop)
   }
 
   render () {
@@ -84,15 +91,23 @@ const deckSelector = createSelector(
   deck => deck
 )
 
+const flopSelector = createSelector(
+  state => state.flop,
+  flop => flop
+)
+
 const mapStateToProps = createSelector(
   deckSelector,
-  (deck) => ({
-    deck
+  flopSelector,
+  (deck, flop) => ({
+    deck,
+    flop
   })
 )
 
 const mapActionsToProps = {
-  onUpdateDeck: updateDeck
+  onUpdateDeck: updateDeck,
+  onUpdateFlop: updateFlop
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Table)

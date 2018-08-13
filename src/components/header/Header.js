@@ -3,56 +3,7 @@ import React, { Component } from 'react'
 import Connection from './Connection'
 import './style.css'
 
-type Props = {
-  name: string,
-};
-
-/* State = {
-  players: Array<Player>,
-  deck: Deck,
-  flop: Array<Card>,
-  playersTurn: number,
-  chat: Array<Message>,
-}
-
-Player = {
-  id: number,
-  name: string,
-  hand: Array<Card>,
-  chipCount: number,
-  connected: boolean,
-}
-
-Card = {
-  value: number,
-  suit: string,
-  img: string,
-}
-
-Message = {
-  id: number,
-  time: Time,
-  name: string,
-  msg: string,
-}
-
-Time = {
-  hour: number,
-  minute: number,
-}
-
-Move = {
-  id: number,
-  move: string,
-  bet?: number,
-}
-
-Deck = {
-  img: string,
-  cards: Array<Card>,
-} */
-
-export default class Header extends Component<Props> {
+export default class Header extends Component {
   render () {
     return (
       <div className="headerWrapper">

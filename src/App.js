@@ -4,7 +4,6 @@ import Header from './components/header/Header'
 import Table from './components/game/Table'
 import { connect } from 'react-redux'
 import { updateUser, apiRequest } from './Actions/UserActions'
-import { bindActionCreators } from 'redux'
 import { createSelector } from 'reselect'
 
 class App extends Component {
@@ -28,6 +27,7 @@ class App extends Component {
     )
   }
 }
+
 const productsSelector = createSelector(
   state => state.products,
   products => products
