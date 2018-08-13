@@ -1,21 +1,22 @@
 import $ from 'jquery'
 
-export const UPDATE_USER = 'users:updateUser'
-export const SHOW_ERROR = 'users:showError'
-export function updateUser (newUser) {
+export const UPDATE_PLAYER = 'players:updatePlayer'
+export const UPDATE_HAND = 'players:updateHand'
+
+export function updatePlayer (newPlayer) {
   return {
-    type: UPDATE_USER,
+    type: UPDATE_PLAYER,
     payload: {
-      user: newUser
+      players: newPlayer
     }
   }
 }
 
-export function showError () {
+export function updateHand (newHand) {
   return {
-    type: SHOW_ERROR,
+    type: UPDATE_HAND,
     payload: {
-      user: 'ERROR!'
+      hand: newHand
     }
   }
 }
@@ -27,11 +28,11 @@ export function apiRequest () {
       success (response) {
         console.log('SUCESS')
 
-        dispatch(updateUser(response.newUser))
+        dispatch(updatePlayer(response.newPlayer))
       },
       error () {
         console.log('ERROR')
-        dispatch(showError())
+        
       }
     })
   }

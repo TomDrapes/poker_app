@@ -1,11 +1,11 @@
-import { UPDATE_USER, SHOW_ERROR } from '../Actions/UserActions'
+import { UPDATE_PLAYER, UPDATE_HAND } from '../Actions/PlayersActions'
 
-export default function userReducer (state = '', { type, payload }) {
+export default function playersReducer (state = [], { type, payload }) {
   switch (type) {
-    case UPDATE_USER:
-      return payload.user
-    case SHOW_ERROR:
-      return payload.user
+    case UPDATE_PLAYER:
+      return payload.players
+    case UPDATE_HAND:
+      return state.updateIn(['players'], x => x.set('hand', payload.hand))
     default:
       return state
   }
