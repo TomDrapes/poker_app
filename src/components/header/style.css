@@ -1,0 +1,33 @@
+.headerWrapper {
+  padding: 5px;
+  font-size: 24px;
+  background-color: #000;
+  color: #fff;
+}
+.name{
+  float: left;
+}
+.connectionIcon{
+  float: left;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  border: 1px solid #000;
+  background-color: rgb(52, 233, 6);
+  margin: 10px;
+}
+
+.logo {
+  margin: 10px;
+  font-size: 44px;
+  float: left;
+}
+.connectionWrapper {
+  float: right;
+  margin: 0px 50px 0px 10px;
+  padding-top: 20px;
+}
+
+.clear{
+  clear: both;
+}
