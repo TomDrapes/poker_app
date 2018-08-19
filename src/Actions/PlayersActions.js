@@ -1,7 +1,8 @@
 import $ from 'jquery'
 
 export const UPDATE_PLAYER = 'players:updatePlayer'
-export const UPDATE_HAND = 'players:updateHand'
+export const UPDATE_TURN= 'players:updatePlayersTurn'
+
 
 export function updatePlayer (newPlayer) {
   return {
@@ -12,12 +13,12 @@ export function updatePlayer (newPlayer) {
   }
 }
 
-export function updateHand (newHand) {
+export function updatePlayersTurn (player) {
   return {
-    type: UPDATE_HAND,
-    payload: {
-      hand: newHand
-    }
+    type: UPDATE_TURN,
+    name: player.name,
+    payload: !player.playersTurn
+    
   }
 }
 

@@ -6,30 +6,31 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop } from '../../Actions/FlopActions'
-import { updatePlayer } from '../../Actions/PlayersActions'
+import { updatePlayer, updatePlayersTurn } from '../../Actions/PlayersActions'
+import { updateBet } from '../../Actions/BetActions'
 
 class Table extends Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      deck: this.props.deck,
-      flop: this.props.flop,
-      players: this.props.players 
+      betAmount: 50,
     }
 
     this.onUpdateDeck = this.onUpdateDeck.bind(this)
     this.onUpdateFlop = this.onUpdateFlop.bind(this)
     this.onUpdatePlayer = this.onUpdatePlayer.bind(this)
+    this.onUpdatePlayersTurn = this.onUpdatePlayersTurn.bind(this)
 
-    this.shuffle(this.state.deck)
+    //this.shuffle(this.state.deck)
+    this.shuffle(this.props.deck)
     this.deal()
   }
 
   deal () {
-    let p = this.state.players
-    let deck = this.state.deck
-    for(let i = 0 ; i < this.state.players.length; i++){
+    let p = this.props.players
+    let deck = this.props.deck
+    for(let i = 0 ; i < this.props.players.length; i++){
       for(let j = 0; j < 2; j++){
         p[i].hand.push(deck[0])
         deck.shift()
@@ -44,12 +45,12 @@ class Table extends Component {
   }
 
   flop () {
-    let flop = this.state.flop
-    let deck = this.state.deck
+    let flop = this.props.flop
+    let deck = this.props.deck
     flop.push(deck[0])
     deck.shift()
     this.onUpdateDeck(deck)
-    this.onUpdateFlop(flop)
+    this.onUpdateFlop(flop)    
   }
 
   playersHand (player) {
@@ -71,35 +72,88 @@ class Table extends Component {
     this.props.onUpdatePlayer(players)
   } 
 
+  onUpdatePlayersTurn (player) {
+    this.props.onUpdatePlayersTurn(player)
+  }
+
+  onUpdateBet (bet) {
+    this.props.onUpdateBet(bet)
+  }
+
+  playerButtons (player) {
+    if(player.playersTurn){        
+      return (
+        <div>
+          <button className="checkBtn" onClick={() => this.increaseBet()}>Check</button>
+          <button className="foldBtn" onClick ={() => this.flop()}>Fold</button>
+          <button type="button" className="betBtn" onClick={() => this.bet()}>Bet</button>
+          <button className="betAmount">$50</button>
+        </div>
+      )
+    }      
+    return (
+      <div>
+        <button className="checkBtn" disabled>Check</button>
+        <button className="foldBtn" disabled>Fold</button>
+        <button type="button" className="betBtn" disabled>Bet</button>
+        <button className="betAmount">$50</button>
+      </div>
+    )
+  }
+
+  check () {
+  }
+
+  increaseBet(){
+    this.setState({
+      betAmount: this.state.betAmount *2
+    })
+  }
+
+  bet () {      
+    this.onUpdatePlayersTurn(this.props.players[1])    
+    this.onUpdatePlayersTurn(this.props.players[0])
+
+    this.onUpdateBet(this.state.betAmount)
+    
+    /*this.setState({
+      currentBet: this.state.currentBet + this.state.betAmount,      
+    })*/
+  }
+
+  fold () {}
+  mainGameLoop () {
+    //this.updateState()
+    console.log("render: ", this.props.bet)
+  }
   render () {
-    console.log("render")
+    this.mainGameLoop()
     return (
       <div className="table">
         <div className="gameWindow">
           <div className="oppSide">
-            <div className="oppName">Jerry: $350</div>
-            {this.playersHand(this.state.players[0])}
+            {this.playerButtons(this.props.players[1])}
+            <div className="oppName">Jerry: ${this.props.players[1].chipCount}</div>
+            {this.playersHand(this.props.players[1])}
             <div className="clear" />
           </div>
           <div className="flopWrapper">
             <div className="flop">
               <Deck />
-              {this.state.flop.map(x => x.card)}
+              {this.props.flop.map(x => x.card)}
               <div className="clear" />
             </div>
           </div>
           <div className="playerSide">
-            {this.playersHand(this.state.players[1])}
+            {this.playersHand(this.props.players[0])}
             <div className="btnWrapper">
               <div className="statusMsg">Waiting for Jerry...</div>
               <div className="clear" />
-              <div className="playerName">John: $250</div>
+              <div className="playerName">John: ${this.props.players[0].chipCount}</div>
               <div className="clear" />
-              <div className="checkBtn">Check</div>
-              <div className="foldBtn">Fold</div>
-              <div className="betBtn" onClick={() => this.flop()}>Bet</div>
-              <div className="betAmount">$50</div>
+              {this.playerButtons(this.props.players[0])}
             </div>
+            <div>Pot:{this.props.pot} CurrentBet:{this.props.bet}</div>
             <div className="clear" />
           </div>
         </div>
@@ -111,36 +165,21 @@ class Table extends Component {
   }
 }
 
-const deckSelector = createSelector(
-  state => state.deck,
-  deck => deck
-)
-
-const flopSelector = createSelector(
-  state => state.flop,
-  flop => flop
-)
-
-const playerSelector = createSelector(
-  state => state.players,
-  players => players
-)
-
-const mapStateToProps = createSelector(
-  deckSelector,
-  flopSelector,
-  playerSelector,
-  (deck, flop, players) => ({
-    deck,
-    flop,
-    players
-  })
-)
+const mapStateToProps = (state) => {
+  return {  
+    players: state.players,  
+    deck: state.deck,
+    flop: state.flop,
+    bet: state.bet
+  }
+};
 
 const mapActionsToProps = {
   onUpdateDeck: updateDeck,
   onUpdateFlop: updateFlop,
-  onUpdatePlayer: updatePlayer
+  onUpdatePlayer: updatePlayer,
+  onUpdatePlayersTurn: updatePlayersTurn,
+  onUpdateBet: updateBet,
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Table)

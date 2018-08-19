@@ -8,6 +8,7 @@ import { Provider } from 'react-redux'
 import playersReducer from './Reducers/PlayersReducer'
 import deckReducer from './Reducers/DeckReducer'
 import flopReducer from './Reducers/FlopReducer'
+import betReducer from './Reducers/BetReducer'
 import thunk from 'redux-thunk'
 
 import Card from './components/game/card'
@@ -15,7 +16,8 @@ import Card from './components/game/card'
 const allReducers = combineReducers({  
   players: playersReducer,
   deck: deckReducer,
-  flop: flopReducer
+  flop: flopReducer,
+  bet: betReducer
 })
 
 const allStoreEnhancers = compose(
@@ -26,8 +28,10 @@ const store = createStore(
   allReducers,
   {    
     players: [
-      { name: "PlayerOne", hand: [] },
-      { name: "PlayerTwo", hand: [] }
+      { name: "PlayerOne", hand: [], folded: false, hasDealerChip: true,
+        playersTurn: false, chipCount: 200 },
+      { name: "PlayerTwo", hand: [], folded: false, hasDealerChip: false,
+        playersTurn: true, chipCount: 200 }
     ],
     deck: [
       { card: <Card key={1} image={require('./images/ACE-H.png')} />, value: 14 },
@@ -83,7 +87,8 @@ const store = createStore(
       { card: <Card key={51} image={require('./images/3-S.png')} />, value: 3 },
       { card: <Card key={52} image={require('./images/2-S.png')} />, value: 2 }
     ],
-    flop: []
+    flop: [],
+    bet: 0,    
   },
   allStoreEnhancers
 )
