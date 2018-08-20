@@ -9,6 +9,8 @@ import playersReducer from './Reducers/PlayersReducer'
 import deckReducer from './Reducers/DeckReducer'
 import flopReducer from './Reducers/FlopReducer'
 import betReducer from './Reducers/BetReducer'
+import moveReducer from './Reducers/MoveReducer'
+import potReducer from './Reducers/PotReducer'
 import thunk from 'redux-thunk'
 
 import Card from './components/game/card'
@@ -17,7 +19,9 @@ const allReducers = combineReducers({
   players: playersReducer,
   deck: deckReducer,
   flop: flopReducer,
-  bet: betReducer
+  bet: betReducer,
+  lastMove: moveReducer,
+  pot: potReducer,
 })
 
 const allStoreEnhancers = compose(
@@ -88,7 +92,9 @@ const store = createStore(
       { card: <Card key={52} image={require('./images/2-S.png')} />, value: 2 }
     ],
     flop: [],
-    bet: 0,    
+    bet: 10,
+    lastMove: '',
+    pot: 0  
   },
   allStoreEnhancers
 )

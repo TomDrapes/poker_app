@@ -1,4 +1,9 @@
-import { UPDATE_PLAYER, UPDATE_TURN } from '../Actions/PlayersActions'
+import {
+  UPDATE_PLAYER,
+  UPDATE_TURN,
+  UPDATE_CHIP_COUNT,
+  WON_POT, 
+} from '../Actions/PlayersActions'
 
 export default function playersReducer (state = [], action = {}) {
   switch (action.type) {
@@ -14,6 +19,28 @@ export default function playersReducer (state = [], action = {}) {
         return player
       })      
       return updatedTurn
+    case UPDATE_CHIP_COUNT:
+      const updatedChipCount = state.map(player => {
+        if(player.name === action.name){
+          return {
+            ...player,
+            chipCount: action.payload
+          }
+        }
+        return player
+      })
+      return updatedChipCount
+    case WON_POT:
+      const wonPot = state.map(player => {
+        if(player.name === action.name){
+          return {
+            ...player,
+            chipCount: action.payload
+          }
+        }
+        return player
+      })
+      return wonPot
     default:
       return state
   }
