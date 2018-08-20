@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Deck from './deck'
 import Chat from '../chat/chat'
+import Card from './card'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
@@ -30,8 +31,6 @@ class Table extends Component {
     }else if(this.props.lastMove === 'shuffled'){
       this.deal()
     }
-    
-
   }
 
   deal () {
@@ -43,9 +42,9 @@ class Table extends Component {
         deck.shift()
       }
     }
-    this.onUpdateDeck(deck)
-    this.onUpdatePlayer(p)
-    this.onUpdateLastMove("dealt")
+    this.props.onUpdateDeck(deck)
+    this.props.onUpdatePlayer(p)
+    this.props.onUpdateLastMove("dealt")
   }
 
   shuffle (deck) {
@@ -60,20 +59,19 @@ class Table extends Component {
         d.push(this.props.players[p].hand[h])
       }
     }
-    this.onUpdateDeck(d.sort(function (a, b) { return 0.5 - Math.random() }))
-    this.onResetFlop()    
-    this.onUpdateLastMove("shuffled")
+    this.props.onUpdateDeck(d.sort(function (a, b) { return 0.5 - Math.random() }))
+    this.props.onResetFlop()    
+    this.props.onUpdateLastMove("shuffled")
   }
 
   flop () {
     let flop = this.props.flop
     let deck = this.props.deck
     flop.push(deck[0])
-    console.log(flop)
     deck.shift()
-    this.onUpdateDeck(deck)
-    this.onUpdateFlop(flop)
-    this.onUpdateLastMove('flopped')  
+    this.props.onUpdateDeck(deck)
+    this.props.onUpdateFlop(flop)
+    this.props.onUpdateLastMove('flopped')    
   }
 
   playersHand (player) {
@@ -81,46 +79,6 @@ class Table extends Component {
       return player.hand.map(x => x.card)
     }    
     return null
-  }
-
-  onUpdateDeck (deck) {
-    this.props.onUpdateDeck(deck)
-  }
-
-  onUpdateFlop (flop) {
-    this.props.onUpdateFlop(flop)
-  }
-
-  onUpdatePlayer (players) {
-    this.props.onUpdatePlayer(players)
-  } 
-
-  onUpdatePlayersTurn (player) {
-    this.props.onUpdatePlayersTurn(player)
-  }
-
-  onUpdateBet (bet) {
-    this.props.onUpdateBet(bet)
-  }
-
-  onUpdateLastMove (move) {
-    this.props.onUpdateLastMove(move)
-  }
-
-  onUpdateChipCount (player, count) {
-    this.props.onUpdateChipCount(player, count)
-  }
-
-  onUpdatePot (pot) {
-    this.props.onUpdatePot(pot)
-  }
-
-  onWonPot (player, pot) {
-    this.props.onWonPot(player, pot)
-  }
-
-  onResetFlop() {
-    this.props.onResetFlop()
   }
 
   playerButtons (player) {
@@ -158,12 +116,12 @@ class Table extends Component {
   check () {
     if(this.props.lastMove === 'checked'){
       this.flop();
-      this.onUpdatePlayersTurn(this.props.players[1])    
-      this.onUpdatePlayersTurn(this.props.players[0])
+      this.props.onUpdatePlayersTurn(this.props.players[1])    
+      this.props.onUpdatePlayersTurn(this.props.players[0])
     }else{
-      this.onUpdateLastMove('checked')
-      this.onUpdatePlayersTurn(this.props.players[1])    
-      this.onUpdatePlayersTurn(this.props.players[0])
+      this.props.onUpdateLastMove('checked')
+      this.props.onUpdatePlayersTurn(this.props.players[1])    
+      this.props.onUpdatePlayersTurn(this.props.players[0])
     }
   }
 
@@ -184,49 +142,49 @@ class Table extends Component {
   }
 
   bet (player) {      
-    this.onUpdatePlayersTurn(this.props.players[1])    
-    this.onUpdatePlayersTurn(this.props.players[0])
+    this.props.onUpdatePlayersTurn(this.props.players[1])    
+    this.props.onUpdatePlayersTurn(this.props.players[0])
 
     // No moves made yet so player can only bet
     if( this.props.lastMove !== 'called' && this.props.lastMove !== 'raised'
       && this.props.lastMove !== 'bet'){
 
-      this.onUpdateLastMove('bet')
-      this.onUpdateChipCount(player, this.state.betAmount) 
-      this.onUpdateBet(this.state.betAmount)
-      this.onUpdatePot(this.props.pot + this.state.betAmount)
+      this.props.onUpdateLastMove('bet')
+      this.props.onUpdateChipCount(player, this.state.betAmount) 
+      this.props.onUpdateBet(this.state.betAmount)
+      this.props.onUpdatePot(this.props.pot + this.state.betAmount)
 
     // Last Move was a bet/raise and player calling
     }else if(this.state.betAmount === this.props.currentBet && this.props.lastMove === 'bet'
     || this.state.betAmount === this.props.currentBet && this.props.lastMove === 'raised'){
 
-      this.onUpdateLastMove('called')
-      this.onUpdateChipCount(player, this.props.currentBet)
-      this.onUpdatePot(this.props.pot + this.state.betAmount)
+      this.props.onUpdateLastMove('called')
+      this.props.onUpdateChipCount(player, this.props.currentBet)
+      this.props.onUpdatePot(this.props.pot + this.state.betAmount)
 
     // Last move was a bet and player is raising
     }else if(this.props.lastMove === 'bet' && this.state.betAmount > this.props.currentBet){
-      this.onUpdateBet(this.state.betAmount)
-      this.onUpdateLastMove('raised')
-      this.onUpdateChipCount(player, this.state.betAmount)
-      this.onUpdatePot(this.props.pot + this.state.betAmount)
+      this.props.onUpdateBet(this.state.betAmount)
+      this.props.onUpdateLastMove('raised')
+      this.props.onUpdateChipCount(player, this.state.betAmount)
+      this.props.onUpdatePot(this.props.pot + this.state.betAmount)
     }
   }
 
   fold (player) {
     for(let i = 0; i < this.props.players.length; i++){
       if(this.props.players[i].name !== player.name){
-        this.onWonPot(this.props.players[i], this.props.pot)
+        this.props.onWonPot(this.props.players[i], this.props.pot)
       }
     }
-    this.onUpdateBet(10)
+    this.props.onUpdateBet(10)
     this.setState({
       betAmount: 10,
     })
-    this.onUpdateLastMove('folded')
-    this.onUpdatePot(0)
-    this.onUpdatePlayersTurn(this.props.players[1])
-    this.onUpdatePlayersTurn(this.props.players[0])
+    this.props.onUpdateLastMove('folded')
+    this.props.onUpdatePot(0)
+    this.props.onUpdatePlayersTurn(this.props.players[1])
+    this.props.onUpdatePlayersTurn(this.props.players[0])
   }  
 
   betIncrementor = (player) => (
@@ -236,6 +194,208 @@ class Table extends Component {
       <i className="fa fa-caret-down" onClick={() => this.decreaseBet()} />
     </div>
   )
+
+  isFlush(hand){
+    let hearts = 0, diamonds = 0, spades = 0, clubs = 0
+    for(let i = 0; i < hand.length; i++){
+      switch(hand[i].suit){
+        case 'HEART': hearts++
+          break
+        case 'DIAMOND': diamonds++
+          break
+        case 'CLUB': clubs++
+          break
+        case 'SPADE': spades++
+          break
+        default: break
+      }
+    }
+
+    if(hearts >= 5){
+      return 'HEART'
+    }else if(diamonds >= 5){
+      return 'DIAMOND'
+    }else if(spades >= 5){
+      return 'SPADE'
+    }else if(clubs >= 5){
+      return 'CLUB'
+    }else{
+      return 'NO_FLUSH'
+    } 
+  }
+
+  isRoyalFlush(hand, suit){
+    let ace = false, king = false, queen = false, jack = false, ten = false
+    for (let i = 0; i < hand.length; i++){
+      if(hand[i].value === 14 && hand[i].suit === suit){
+        ace = true
+      }else if(hand[i].value === 13 && hand[i].suit ===suit){
+        king = true
+      }else if(hand[i].value === 12 && hand[i].suit === suit){
+        queen = true
+      }else if(hand[i].value === 11 && hand[i].suit === suit){
+        jack = true
+      }else if(hand[i].value === 10 && hand[i].suit === suit){
+        ten = true
+      } 
+    }
+    if(ace && king && queen && jack && ten){
+      return true
+    }
+    return false
+  }
+
+  isStraightFlush(h, suit){
+    let hand = h
+    // Add ace with value 1 to check for other possible straights
+    for(let i = 0; i < hand.length; i++){
+      if(hand[i].value === 14){
+        hand.push({ card: <Card key={14} image={require('../../images/ACE-D.png')} />, value: 1, suit: suit })
+      }
+    }
+
+    for(let j = 0; j < hand.length-4; j++){
+      if(hand[j+1].value === hand[j].value + 1 && 
+        hand[j+2].value === hand[j].value + 2 &&
+        hand[j+3].value === hand[j].value + 3 &&
+        hand[j+4].value === hand[j].value + 4 &&
+        hand[j].suit === suit && hand[j+1].suit === suit &&
+        hand[j+2].suit === suit && hand[j+3].suit === suit &&
+        hand[j+4].suit === suit){
+          return true
+        }
+    }
+    return false
+  }
+
+  isOfAKind(hand){
+    let count = 0
+    for(let i = 0; i < hand.length; i++){
+      let tempCount = 0
+      for(let j = i+1; j < hand.length; j++){
+        if(hand[i].value === hand[j].value){
+          tempCount++
+        }else{
+          break
+        }
+      }
+      if(tempCount >= 2 && tempCount > count){
+        count = tempCount
+      }
+    }
+    return count
+  }
+
+  isFullHouse(h){
+    let hand = h
+    let threeOfAKind = false
+    let pair = false
+    for(let i = 0; i < hand.length-2; i++){
+      if(hand[i].value === hand[i+1].value &&
+        hand[i].value === hand[i+2].value){
+          threeOfAKind = true
+          hand.splice(i, 3)
+        }
+    }
+
+    for(let j = 0; j < hand.length-1; j++){
+      if(hand[j].value === hand[j+1].value){
+        pair = true
+      }
+    }
+    if(threeOfAKind && pair){
+      return true
+    }
+    return false
+  }
+
+  isStraight(h){
+    let hand = h
+    // Add ace with value 1 to check for other possible straights
+    for(let i = 0; i < hand.length; i++){
+      if(hand[i].value === 14){
+        hand.push({ card: <Card key={14} image={require('../../images/ACE-D.png')} />, value: 1, suit: hand[i].suit })
+      }
+    }
+
+    for(let j = 0; j < hand.length-4; j++){
+      if(hand[j+1].value === hand[j].value + 1 && 
+        hand[j+2].value === hand[j].value + 2 &&
+        hand[j+3].value === hand[j].value + 3 &&
+        hand[j+4].value === hand[j].value + 4 ){
+          return true
+        }
+    }
+    return false
+  }
+
+  isTwoPair(h){
+    let hand = h    
+    let pairs = 0
+    for(let i = 0; i < hand.length-1; i++){
+      if(hand[i].value === hand[i+1].value){
+          pairs++
+          hand.splice(i, 2)
+        }
+    }
+
+    for(let j = 0; j < hand.length-1; j++){
+      if(hand[j].value === hand[j+1].value){
+        pairs++
+      }
+    }
+    if(pairs === 2){
+      return true
+    }
+    return false
+  }
+
+  determineBestHand (player) {    
+    const cards = player.hand.concat(this.props.flop).sort(function(a, b){
+      return a.value - b.value
+    })    
+    const flush = this.isFlush(cards)
+
+    if(flush !== 'NO_FLUSH'){      
+      if(this.isRoyalFlush(cards, flush)){
+        return 'royal_flush_'+flush
+      }else if(this.isStraightFlush(cards, flush)){
+        return 'straight_flush_'+flush
+      }
+    }
+
+    if(this.isOfAKind(cards) === 4){
+      return 'four_of_a_kind'
+    }
+
+    if(this.isFullHouse(cards)){
+      return 'full_house'
+    }
+
+    
+    if(flush !== 'NO_FLUSH'){
+      return 'flush_'+flush
+    }
+    
+    if(this.isStraight(cards)){
+      return 'straight'
+    }
+
+    if(this.isOfAKind(cards) === 3){
+      return 'three_of_a_kind'
+    }
+
+    if(this.isTwoPair(cards)){
+      return 'two_pair'
+    }
+
+    if(this.isOfAKind(cards) === 2){
+      return 'pair'
+    }
+
+    return 'high_card' + cards[cards.length-1].value + cards[cards.length-1].suit
+
+  }
   
   render () {
     return (
