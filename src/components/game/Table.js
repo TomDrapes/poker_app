@@ -23,8 +23,12 @@ class Table extends Component {
 
   componentDidUpdate(){
 
-    // If player calls then flop next card off deck
-    if(this.props.lastMove === 'called'){
+    if(this.props.lastMove === 'both_checked' && this.props.flop.length === 5 ||
+      this.props.lastMove === 'called' && this.props.flop.length === 5){
+        console.log(this.determineBestHand(this.props.players[1]))
+        console.log(this.determineBestHand(this.props.players[0]))
+        
+    } else if(this.props.lastMove === 'called'){
       this.flop()
     }else if(this.props.lastMove === 'folded'){
       this.shuffle(this.props.deck)
@@ -118,6 +122,7 @@ class Table extends Component {
       this.flop();
       this.props.onUpdatePlayersTurn(this.props.players[1])    
       this.props.onUpdatePlayersTurn(this.props.players[0])
+      this.props.onUpdateLastMove('both_checked')
     }else{
       this.props.onUpdateLastMove('checked')
       this.props.onUpdatePlayersTurn(this.props.players[1])    
@@ -246,11 +251,22 @@ class Table extends Component {
   }
 
   isStraightFlush(h, suit){
-    let hand = h
+    let hand = JSON.parse(JSON.stringify(h))
     // Add ace with value 1 to check for other possible straights
     for(let i = 0; i < hand.length; i++){
       if(hand[i].value === 14){
         hand.push({ card: <Card key={14} image={require('../../images/ACE-D.png')} />, value: 1, suit: suit })
+      }
+    }
+
+    // Remove any duplicates which interfere with checking for straights
+    let ofAKinds = this.isOfAKind(hand)
+    for(let x = 0; x < ofAKinds.count-1; x++){
+      for(let y = 0; y < hand.length; y++){
+        if(hand[y].value === ofAKinds.value &&
+          hand[y].suit !== suit){
+          hand.splice(y, 1)
+        }
       }
     }
 
@@ -269,25 +285,28 @@ class Table extends Component {
   }
 
   isOfAKind(hand){
-    let count = 0
+    console.log("hand: ", hand)
+    let count = 1
+    let value = 0
     for(let i = 0; i < hand.length; i++){
-      let tempCount = 0
+      let tempCount = 1
       for(let j = i+1; j < hand.length; j++){
         if(hand[i].value === hand[j].value){
+          //console.log("tempCount: " + tempCount)
           tempCount++
-        }else{
-          break
         }
       }
       if(tempCount >= 2 && tempCount > count){
         count = tempCount
+        value = hand[i].value
       }
     }
-    return count
+    //console.log(count)
+    return {count, value}
   }
 
   isFullHouse(h){
-    let hand = h
+    let hand = JSON.parse(JSON.stringify(h))
     let threeOfAKind = false
     let pair = false
     for(let i = 0; i < hand.length-2; i++){
@@ -310,11 +329,20 @@ class Table extends Component {
   }
 
   isStraight(h){
-    let hand = h
+    let hand = JSON.parse(JSON.stringify(h))
     // Add ace with value 1 to check for other possible straights
     for(let i = 0; i < hand.length; i++){
       if(hand[i].value === 14){
         hand.push({ card: <Card key={14} image={require('../../images/ACE-D.png')} />, value: 1, suit: hand[i].suit })
+      }
+    }
+    // Remove any duplicates which interfere with checking for straights
+    let ofAKinds = this.isOfAKind(hand)
+    for(let x = 0; x < ofAKinds.count-1; x++){
+      for(let y = 0; y < hand.length; y++){
+        if(hand[y].value === ofAKinds.value){
+          hand.splice(y, 1)
+        }
       }
     }
 
@@ -330,7 +358,7 @@ class Table extends Component {
   }
 
   isTwoPair(h){
-    let hand = h    
+    let hand = JSON.parse(JSON.stringify(h)) 
     let pairs = 0
     for(let i = 0; i < hand.length-1; i++){
       if(hand[i].value === hand[i+1].value){
@@ -350,11 +378,15 @@ class Table extends Component {
     return false
   }
 
-  determineBestHand (player) {    
+  determineBestHand (player) {
     const cards = player.hand.concat(this.props.flop).sort(function(a, b){
       return a.value - b.value
-    })    
+    })
+
+    
+    console.log("c", cards)
     const flush = this.isFlush(cards)
+    const ofAkind = this.isOfAKind(cards)
 
     if(flush !== 'NO_FLUSH'){      
       if(this.isRoyalFlush(cards, flush)){
@@ -364,8 +396,8 @@ class Table extends Component {
       }
     }
 
-    if(this.isOfAKind(cards) === 4){
-      return 'four_of_a_kind'
+    if(ofAkind.count === 4){
+      return 'four_of_a_kind_'+ofAkind.value
     }
 
     if(this.isFullHouse(cards)){
@@ -381,19 +413,22 @@ class Table extends Component {
       return 'straight'
     }
 
-    if(this.isOfAKind(cards) === 3){
-      return 'three_of_a_kind'
+    if(ofAkind.count === 3){
+      return 'three_of_a_kind_'+ ofAkind.value
     }
 
     if(this.isTwoPair(cards)){
       return 'two_pair'
     }
 
-    if(this.isOfAKind(cards) === 2){
-      return 'pair'
+    if(ofAkind.count === 2){
+      return 'pair_'+ ofAkind.value
     }
 
-    return 'high_card' + cards[cards.length-1].value + cards[cards.length-1].suit
+    const hand = player.hand.sort(function(a, b){
+      return a.value - b.value
+    })
+    return 'high_card_' + hand[1].value + '_' + hand[1].suit
 
   }
   
