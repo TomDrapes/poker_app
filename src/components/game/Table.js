@@ -292,7 +292,6 @@ class Table extends Component {
       let tempCount = 1
       for(let j = i+1; j < hand.length; j++){
         if(hand[i].value === hand[j].value){
-          //console.log("tempCount: " + tempCount)
           tempCount++
         }
       }
@@ -301,7 +300,6 @@ class Table extends Component {
         value = hand[i].value
       }
     }
-    //console.log(count)
     return {count, value}
   }
 
