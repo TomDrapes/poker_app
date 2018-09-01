@@ -1,6 +1,8 @@
 # Poker App
 by Tom Drapes
 
+![screen](https://github.com/doctorApes/poker_app/blob/master/src/Screenshots/screenshot_1.png)
+
 ## About
 
 This app is based on classic Texas Hold'em Poker and is made for two players.
