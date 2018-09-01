@@ -20,7 +20,7 @@ class Chat extends Component {
   submit = (e) => {
     e.preventDefault()
     this.props.onNewMessage(<Message name='John' message={' ' + this.state.msg} />)
-    this.setState({msg: ''})
+    this.setState({msg: ''}) // Clears input field after msg submitted
   }
 
   render () {
