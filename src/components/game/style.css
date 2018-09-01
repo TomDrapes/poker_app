@@ -6,7 +6,7 @@
   height: 90%;
   background-color: rgb(5, 110, 27);
   float: left;
-
+  padding-top:40px;
 }
 .chatWindow{
   width: 25%;
@@ -32,6 +32,7 @@
   float:left;
   margin: 20px;
   font-size: 24px;
+  color: white;
 }
 .oppChips{
   float: left;
@@ -47,6 +48,7 @@
   float: left;
   font-size: 24px;
   margin-bottom: 20px;
+  color: white;
 }
 
 .playerSide {
@@ -73,7 +75,7 @@
   text-align: center;
   line-height: 50px;
   width: 100px;
-  height: 50px;
+  height: 55px;
   background-color: rgb(218, 218, 218);
   border: 1px solid #000;
   border-radius: 5px;
@@ -84,7 +86,7 @@
   text-align: center;
   line-height: 50px;
   width: 100px;
-  height: 50px;
+  height: 55px;
   margin-left: 20px;
   background-color: rgb(218, 218, 218);
   border: 1px solid #000;
@@ -96,7 +98,7 @@
   text-align: center;
   line-height: 50px;
   width: 100px;
-  height: 50px;
+  height: 55px;
   margin-left: 20px;
   background-color: rgb(218, 218, 218);
   border: 1px solid #000;
@@ -107,9 +109,9 @@
 .betAmount{
   float: left;
   text-align: center;
-  font-size: 14px;  
+  font-size: 12px;
   width: 50px;
-  height: 48px;
+  height: 55px;
   border: 1px solid #000;
   border-left: 0px;
   background-color: #fff;
@@ -120,10 +122,10 @@
 .betAmountWaiting{
   float: left;
   text-align: center;
-  font-size: 14px;  
-  line-height: 48px;
+  font-size: 12px;
+  line-height: 55px;
   width: 50px;
-  height: 48px;
+  height: 55px;
   border: 1px solid #000;
   border-left: 0px;
   background-color: #fff;
@@ -136,6 +138,7 @@
   margin-bottom: 10px;
   margin-top: 30px;
   font-size: 28px;
+  color: white;
 }
 
 .fa-caret-up, .fa-caret-down {

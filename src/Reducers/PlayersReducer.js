@@ -2,7 +2,7 @@ import {
   UPDATE_PLAYER,
   UPDATE_TURN,
   UPDATE_CHIP_COUNT,
-  WON_POT, 
+  WON_POT
 } from '../Actions/PlayersActions'
 
 export default function playersReducer (state = [], action = {}) {
@@ -11,17 +11,17 @@ export default function playersReducer (state = [], action = {}) {
       return action.payload.players
     case UPDATE_TURN:
       const updatedTurn = state.map(player => {
-        if(player.name === action.name){          
+        if (player.name === action.name) {
           return {
             ...player,
             playersTurn: action.payload}
-        }        
+        }
         return player
-      })      
+      })
       return updatedTurn
     case UPDATE_CHIP_COUNT:
       const updatedChipCount = state.map(player => {
-        if(player.name === action.name){
+        if (player.name === action.name) {
           return {
             ...player,
             chipCount: action.payload
@@ -32,7 +32,7 @@ export default function playersReducer (state = [], action = {}) {
       return updatedChipCount
     case WON_POT:
       const wonPot = state.map(player => {
-        if(player.name === action.name){
+        if (player.name === action.name) {
           return {
             ...player,
             chipCount: action.payload

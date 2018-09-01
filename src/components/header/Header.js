@@ -1,4 +1,3 @@
-/* @flow */
 import React, { Component } from 'react'
 import Connection from './Connection'
 import './style.css'

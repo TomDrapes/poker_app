@@ -11,31 +11,45 @@ import flopReducer from './Reducers/FlopReducer'
 import betReducer from './Reducers/BetReducer'
 import moveReducer from './Reducers/MoveReducer'
 import potReducer from './Reducers/PotReducer'
+import messageReducer from './Reducers/MessageReducer'
 import thunk from 'redux-thunk'
 
 import Card from './components/game/card'
 
-const allReducers = combineReducers({  
+// Redux: reducers
+const allReducers = combineReducers({
   players: playersReducer,
   deck: deckReducer,
   flop: flopReducer,
   bet: betReducer,
   lastMove: moveReducer,
   pot: potReducer,
+  messages: messageReducer
 })
 
+// Redux middleware
 const allStoreEnhancers = compose(
   applyMiddleware(thunk), // has to come first or won't work
-  window.devToolsExtension && window.devToolsExtension()
+  window.devToolsExtension && window.devToolsExtension() // Disable this in production
 )
+
+// Create initial store
 const store = createStore(
   allReducers,
-  {    
+  {
     players: [
-      { name: "PlayerOne", hand: [], folded: false, hasDealerChip: true,
-        playersTurn: false, chipCount: 200 },
-      { name: "PlayerTwo", hand: [], folded: false, hasDealerChip: false,
-        playersTurn: true, chipCount: 200 }
+      { name: 'PlayerOne',
+        hand: [],
+        folded: false,
+        hasDealerChip: true,
+        playersTurn: false,
+        chipCount: 200 },
+      { name: 'PlayerTwo',
+        hand: [],
+        folded: false,
+        hasDealerChip: false,
+        playersTurn: true,
+        chipCount: 200 }
     ],
     deck: [
       { card: <Card key={1} image={require('./images/ACE-H.png')} />, value: 14, suit: 'HEART' },
@@ -95,7 +109,8 @@ const store = createStore(
     flop: [],
     bet: 10,
     lastMove: '',
-    pot: 0  
+    pot: 0,
+    messages: []
   },
   allStoreEnhancers
 )

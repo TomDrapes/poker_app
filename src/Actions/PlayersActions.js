@@ -1,7 +1,7 @@
-import $ from 'jquery'
+// import $ from 'jquery'
 
 export const UPDATE_PLAYER = 'players:updatePlayer'
-export const UPDATE_TURN= 'players:updatePlayersTurn'
+export const UPDATE_TURN = 'players:updatePlayersTurn'
 export const UPDATE_CHIP_COUNT = 'updateChipCount'
 export const WON_POT = 'winPot'
 
@@ -19,7 +19,6 @@ export function updatePlayersTurn (player) {
     type: UPDATE_TURN,
     name: player.name,
     payload: !player.playersTurn
-    
   }
 }
 
@@ -39,7 +38,7 @@ export function wonPot (player, pot) {
   }
 }
 
-export function apiRequest () {
+/* export function apiRequest () {
   return dispatch => {
     $.ajax({
       url: 'http://google.com',
@@ -50,8 +49,7 @@ export function apiRequest () {
       },
       error () {
         console.log('ERROR')
-        
       }
     })
   }
-}
+} */

@@ -1,17 +1,17 @@
-import React, { Component } from 'react';
-import './style.css';
+import React, { Component } from 'react'
+import './style.css'
 
 export default class Connection extends Component {
-  constructor(props){
-    super(props);
+  constructor (props) {
+    super(props)
 
     this.state = {
       name: this.props.name,
-      status: this.props.status,
+      status: this.props.status
     }
   }
 
-  render() {
+  render () {
     return (
       <div className="connectionWrapper">
         <div className="connectionIcon" />

@@ -1,24 +1,58 @@
-import React, {Component} from 'react';
-import Message from './message';
-import './style.css';
+import React, {Component} from 'react'
+import Message from './message'
+import { connect } from 'react-redux'
+import { newMsg } from '../../Actions/MessageActions'
+import './style.css'
 
+class Chat extends Component {
+  constructor (props) {
+    super(props)
 
-export default class Chat extends Component {
+    this.state = {
+      msg: ''
+    }
+  }
 
-  render(){
-    return(
+  onInputChange (msg) {
+    this.setState({msg})
+  }
+
+  submit = (e) => {
+    e.preventDefault()
+    this.props.onNewMessage(<Message name='John' message={' ' + this.state.msg} />)
+    this.setState({msg: ''})
+  }
+
+  render () {
+    return (
       <div>
         <div className="messageWindow">
-          <Message name="John" message="How are you?" />
-          <Message name="Jerry" message="Good thanks, you?" />
-          <Message name="John" message="I'm good. Are you ready to play?" />
+          {this.props.messages}
         </div>
         <div className="chatInputWrapper">
-          <div className="input"> Write something...
-            <div className="submitBtn">Submit</div>
-          </div>
+          <form id='message_form' onSubmit={this.submit} className='input-group'>
+            <input className='form-control'
+              onChange={event => this.onInputChange(event.target.value)}
+              value={this.state.msg}
+              placeholder="Write something..." />
+            <span className='input-group-btn'>
+              <button type='submit' className='btn btn-secondary' >Submit</button>
+            </span>
+          </form>
         </div>
       </div>
     )
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    messages: state.messages
+  }
+}
+
+const mapActionsToProps = {
+  onNewMessage: newMsg
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(Chat)

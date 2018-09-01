@@ -1,4 +1,4 @@
-/* @flow */
+
 import React, { Component } from 'react'
 import Deck from './deck'
 import Chat from '../chat/chat'
@@ -22,6 +22,7 @@ class Table extends Component {
     this.shuffle(this.props.deck)
   }
 
+  /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate () {
     if ((this.props.lastMove === 'both_checked' && this.props.flop.length === 5) ||
       (this.props.lastMove === 'called' && this.props.flop.length === 5)) {
@@ -36,6 +37,7 @@ class Table extends Component {
     }
   }
 
+  /* Deal two cards to each player then update state in store */
   deal () {
     const p = this.props.players.map(player => { return {...player, hand: []} })
     let deck = this.props.deck
@@ -62,11 +64,13 @@ class Table extends Component {
         d.push(this.props.players[p].hand[h])
       }
     }
+    /* Update state in store */
     this.props.onUpdateDeck(d.sort(function (a, b) { return 0.5 - Math.random() }))
     this.props.onResetFlop()
     this.props.onUpdateLastMove('shuffled')
   }
 
+  /* Flop top card off the deck and then update state in store */
   flop () {
     let flop = this.props.flop
     let deck = this.props.deck
@@ -77,6 +81,7 @@ class Table extends Component {
     this.props.onUpdateLastMove('flopped')
   }
 
+  /* Returns array of the players cards to be displayed */
   playersHand (player) {
     if (player.hand.length === 2) {
       return player.hand.map(x => x.card)
@@ -84,6 +89,7 @@ class Table extends Component {
     return null
   }
 
+  /* JSX to enable players buttons if it's their turn */
   playerButtons (player) {
     if (player.playersTurn) {
       return (
@@ -105,6 +111,7 @@ class Table extends Component {
     )
   }
 
+  /* Only enable check button if opponents move wasn't bet/raised */
   checkButton = () => {
     if (this.props.lastMove !== 'bet' && this.props.lastMove !== 'raised') {
       return (
@@ -116,6 +123,7 @@ class Table extends Component {
     )
   }
 
+  /* Make check move and update state in store */
   check () {
     if (this.props.lastMove === 'checked') {
       this.flop()
@@ -129,6 +137,7 @@ class Table extends Component {
     }
   }
 
+  /* Increment bet amount and update local state */
   increaseBet (player) {
     if (player.chipCount - (this.state.betAmount + 10) >= 0) {
       this.setState({
@@ -137,6 +146,7 @@ class Table extends Component {
     }
   }
 
+  /* Decrement bet amount and update local state */
   decreaseBet () {
     if (this.state.betAmount - 10 >= this.props.currentBet) {
       this.setState({
@@ -145,6 +155,7 @@ class Table extends Component {
     }
   }
 
+  /* Makes a bet move */
   bet (player) {
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
@@ -173,22 +184,27 @@ class Table extends Component {
     }
   }
 
+  /* Player folds */
   fold (player) {
     for (let i = 0; i < this.props.players.length; i++) {
+      // Opponent wins the pot
       if (this.props.players[i].name !== player.name) {
         this.props.onWonPot(this.props.players[i], this.props.pot)
       }
     }
+    // Revert bet amount back to start state locally and in store */
     this.props.onUpdateBet(10)
     this.setState({
       betAmount: 10
     })
+    // Update state in store
     this.props.onUpdateLastMove('folded')
     this.props.onUpdatePot(0)
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
   }
 
+  // Bet incrementor component
   betIncrementor = (player) => (
     <div className="betAmount">
       <i className="fa fa-caret-up" onClick={() => this.increaseBet(player)} />
@@ -291,7 +307,6 @@ class Table extends Component {
   }
 
   isOfAKind (hand) {
-    console.log('hand: ', hand)
     let count = 1
     let value = 0
     for (let i = 0; i < hand.length; i++) {
@@ -382,12 +397,15 @@ class Table extends Component {
     return false
   }
 
+  /* Checks players hand against the flopped cards to determine what
+     the best hand the player can make and returns it as a string.
+     TODO: change this to return { type: string, value: number }
+  */
   determineBestHand (player) {
     const cards = player.hand.concat(this.props.flop).sort(function (a, b) {
       return a.value - b.value
     })
 
-    console.log('c', cards)
     const flush = this.isFlush(cards)
     const ofAkind = this.isOfAKind(cards)
 
@@ -471,6 +489,7 @@ class Table extends Component {
   }
 }
 
+/* Redux: map state in store to props for easy access */
 const mapStateToProps = (state) => {
   return {
     players: state.players,
@@ -482,6 +501,7 @@ const mapStateToProps = (state) => {
   }
 }
 
+/* Redux: map actions to props for easy reference */
 const mapActionsToProps = {
   onUpdateDeck: updateDeck,
   onUpdateFlop: updateFlop,
