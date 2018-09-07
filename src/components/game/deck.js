@@ -6,7 +6,7 @@ export default class Deck extends Component {
   render () {
     return (
       <div className="deck">
-        <img src={require('../../images/back.png')} alt="deck" width='100' height='140'/>
+        <img src={require('../../images/cards/back.png')} alt="deck" width='100' height='140'/>
       </div>
     )
   }

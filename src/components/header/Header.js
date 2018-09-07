@@ -7,7 +7,7 @@ export default class Header extends Component {
     return (
       <div className="headerWrapper">
         <span>
-          <div className="logo">Poker</div>
+          <img src={require('../../images/Poker-logo-white.png')} height='80' />
           <Connection name="John" status="connected"></Connection>
           <Connection name="Jerry" status="connected" />
         </span>

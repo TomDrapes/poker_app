@@ -277,7 +277,7 @@ class Table extends Component {
     // Add ace with value 1 to check for other possible straights
     for (let i = 0; i < hand.length; i++) {
       if (hand[i].value === 14) {
-        hand.push({ card: <Card key={14} image={require('../../images/ACE-D.png')} />, value: 1, suit: suit })
+        hand.push({ card: <Card key={14} image={require('../../images/cards/ACE-D.png')} />, value: 1, suit: suit })
       }
     }
 
@@ -352,7 +352,7 @@ class Table extends Component {
     // Add ace with value 1 to check for other possible straights
     for (let i = 0; i < hand.length; i++) {
       if (hand[i].value === 14) {
-        hand.push({ card: <Card key={14} image={require('../../images/ACE-D.png')} />, value: 1, suit: hand[i].suit })
+        hand.push({ card: <Card key={14} image={require('../../images/cards/ACE-D.png')} />, value: 1, suit: hand[i].suit })
       }
     }
     // Remove any duplicates which interfere with checking for straights
