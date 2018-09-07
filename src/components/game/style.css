@@ -6,7 +6,8 @@
 .gameWindow{
   width: 75vw;
   height: 90vh;
-  background-color: rgb(5, 110, 27);
+  /*background-color: rgb(5, 110, 27);*/
+  background-image: radial-gradient(circle, rgb(5,110,27), rgb(2, 72, 17));
   float: left;
   padding-top:40px;
 }
