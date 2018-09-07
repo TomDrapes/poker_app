@@ -95,17 +95,17 @@ class Table extends Component {
       return (
         <div>
           {this.checkButton()}
-          <button className="foldBtn" onClick ={() => this.fold(player)}>Fold</button>
-          <button type="button" className="betBtn" onClick={() => this.bet(player)}>Bet</button>
+          <button className="foldBtn" onClick ={() => this.fold(player)}>FOLD</button>
+          <button type="button" className="betBtn" onClick={() => this.bet(player)}>BET</button>
           {this.betIncrementor(player)}
         </div>
       )
     }
     return (
       <div>
-        <button className="checkBtn" disabled>Check</button>
-        <button className="foldBtn" disabled>Fold</button>
-        <button type="button" className="betBtn" disabled>Bet</button>
+        <button className="checkBtn" disabled>CHECK</button>
+        <button className="foldBtn" disabled>FOLD</button>
+        <button type="button" className="betBtn" disabled>BET</button>
         <div className="betAmountWaiting">{this.props.currentBet}</div>
       </div>
     )
@@ -115,11 +115,11 @@ class Table extends Component {
   checkButton = () => {
     if (this.props.lastMove !== 'bet' && this.props.lastMove !== 'raised') {
       return (
-        <button className="checkBtn" onClick={() => this.check()}>Check</button>
+        <button className="checkBtn" onClick={() => this.check()}>CHECK</button>
       )
     }
     return (
-      <button className="checkBtn" disabled>Check</button>
+      <button className="checkBtn" disabled>CHECK</button>
     )
   }
 
@@ -457,7 +457,10 @@ class Table extends Component {
         <div className="gameWindow">
           <div className="oppSide">
             {this.playerButtons(this.props.players[1])}
-            <div className="oppName">Jerry: ${this.props.players[1].chipCount}</div>
+            <div className="oppName">
+              <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' />
+              {this.props.players[1].chipCount}
+            </div>
             {this.playersHand(this.props.players[1])}
             <div className="clear" />
           </div>
@@ -473,7 +476,10 @@ class Table extends Component {
             <div className="btnWrapper">
               <div className="statusMsg">Jerry {this.props.lastMove} {this.props.currentBet}</div>
               <div className="clear" />
-              <div className="playerName">John: ${this.props.players[0].chipCount}</div>
+              <div className="playerName">
+                <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' />
+                {this.props.players[0].chipCount}
+              </div>
               <div className="clear" />
               {this.playerButtons(this.props.players[0])}
             </div>
@@ -481,9 +487,6 @@ class Table extends Component {
             <div className="clear" />
           </div>
         </div>
-        {/* <div className="chatWindow">
-          <Chat />
-    </div> */}
       </div>
     )
   }

@@ -11,6 +11,7 @@ export default class App extends Component {
         <Header />
         <Table />
         <Chat />
+
       </div>
     )
   }

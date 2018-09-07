@@ -71,9 +71,11 @@
   float: left;
   text-align: center;
   line-height: 50px;
+  font-size: 18px;
   width: 100px;
   height: 55px;
-  background-color: rgb(218, 218, 218);
+  background-image: linear-gradient(rgb(255, 6, 6), rgb(110,6,6));
+  color: white;
   border: 1px solid #000;
   border-radius: 5px;
 }
@@ -82,22 +84,29 @@
   float: left;
   text-align: center;
   line-height: 50px;
+  font-size: 18px;
   width: 100px;
   height: 55px;
   margin-left: 20px;
-  background-color: rgb(218, 218, 218);
+  background-image: linear-gradient(rgb(255, 6, 6), rgb(110,6,6));
+  color: white;
   border: 1px solid #000;
   border-radius: 5px;
+}
+.foldBtn:hover, .betBtn:hover, .checkBtn:hover{
+  opacity: 0.8;
 }
 
 .betBtn{
   float: left;
   text-align: center;
   line-height: 50px;
+  font-size: 18px;
   width: 100px;
   height: 55px;
   margin-left: 20px;
-  background-color: rgb(218, 218, 218);
+  background-image: linear-gradient(rgb(255, 6, 6), rgb(110,6,6));
+  color: white;
   border: 1px solid #000;
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
@@ -111,7 +120,8 @@
   height: 55px;
   border: 1px solid #000;
   border-left: 0px;
-  background-color: #fff;
+  background-image: linear-gradient(rgb(138, 134, 134), rgb(0, 0, 0));
+  color: white;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
@@ -125,7 +135,8 @@
   height: 55px;
   border: 1px solid #000;
   border-left: 0px;
-  background-color: #fff;
+  background-image: linear-gradient(rgb(138, 134, 134), rgb(0, 0, 0));
+  color: white;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
@@ -141,4 +152,8 @@
 .fa-caret-up, .fa-caret-down {
   font-size: 12px;
   cursor: pointer;
+}
+
+.pokerChip{
+  margin-right: 10px;
 }
