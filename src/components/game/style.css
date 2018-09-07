@@ -1,19 +1,16 @@
 .table{
-  height: 100%;
+  height: 100vh;
+  width: 75vw;
+  float: left;
 }
 .gameWindow{
-  width: 74%;
-  height: 90%;
+  width: 75vw;
+  height: 90vh;
   background-color: rgb(5, 110, 27);
   float: left;
   padding-top:40px;
 }
-.chatWindow{
-  width: 25%;
-  height: 90%;
-  border: 1px solid #000;
-  float: left;
-}
+
 .cardWrapper {
   width: 100px;
   height: 140px;

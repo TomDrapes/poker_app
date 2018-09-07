@@ -481,9 +481,9 @@ class Table extends Component {
             <div className="clear" />
           </div>
         </div>
-        <div className="chatWindow">
+        {/* <div className="chatWindow">
           <Chat />
-        </div>
+    </div> */}
       </div>
     )
   }

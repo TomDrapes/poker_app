@@ -1,12 +1,19 @@
+.chatWindow{
+  width: 25vw;
+  height: 90vh;
+  border: 1px solid rgb(0, 0, 0);
+  float: left;
+}
 .messageWindow{
-  height: 82vh;
+  height: 83.5vh;
+  overflow-y: scroll;
 }
 .chatInputWrapper{
   height: 100%;
   width: 100%;
 }
 .message{
-  margin: 10px;
+  padding: 5px;
 }
 
 .btn{

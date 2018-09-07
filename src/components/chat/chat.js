@@ -19,13 +19,13 @@ class Chat extends Component {
 
   submit = (e) => {
     e.preventDefault()
-    this.props.onNewMessage(<Message name='John' message={' ' + this.state.msg} />)
+    this.props.onNewMessage(<Message name='John' message={' ' + this.state.msg} key={this.props.messages.length} id={this.props.messages.length}/>)
     this.setState({msg: ''}) // Clears input field after msg submitted
   }
 
   render () {
     return (
-      <div>
+      <div className="chatWindow">
         <div className="messageWindow">
           {this.props.messages}
         </div>
