@@ -1,7 +1,7 @@
 # Poker App
 by Tom Drapes
 
-![screen](https://github.com/doctorApes/poker_app/blob/master/src/Screenshots/screenshot_1.png)
+![screen](https://github.com/doctorApes/poker_app/blob/master/client/src/Screenshots/screenshot_1.png)
 
 ## About
 
