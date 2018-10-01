@@ -1,5 +1,3 @@
-// import $ from 'jquery'
-
 export const UPDATE_PLAYER = 'players:updatePlayer'
 export const UPDATE_TURN = 'players:updatePlayersTurn'
 export const UPDATE_CHIP_COUNT = 'updateChipCount'
