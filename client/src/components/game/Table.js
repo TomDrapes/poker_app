@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import Deck from './deck'
-import Chat from '../chat/chat'
+//import Chat from '../chat/chat'
 import Card from './card'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
@@ -458,7 +458,7 @@ class Table extends Component {
           <div className="oppSide">
             {this.playerButtons(this.props.players[1])}
             <div className="oppName">
-              <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' />
+              <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip" />
               {this.props.players[1].chipCount}
             </div>
             {this.playersHand(this.props.players[1])}
@@ -477,7 +477,7 @@ class Table extends Component {
               <div className="statusMsg">Jerry {this.props.lastMove} {this.props.currentBet}</div>
               <div className="clear" />
               <div className="playerName">
-                <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' />
+                <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip"/>
                 {this.props.players[0].chipCount}
               </div>
               <div className="clear" />
