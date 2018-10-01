@@ -3,6 +3,9 @@ const Schema = mongoose.Schema;
 
 //Create Game State Schema
 const GameStateSchema = new Schema({
+  _id: {
+    type: String
+  },
   players: {
     type: Array,
     "default": []

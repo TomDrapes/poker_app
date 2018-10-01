@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import Deck from './deck'
-//import Chat from '../chat/chat'
+import axios from 'axios'
 import Card from './card'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
@@ -10,6 +10,9 @@ import { updatePlayer, updatePlayersTurn, updateChipCount, wonPot } from '../../
 import { updateBet } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
+import { isFlush, isRoyalFlush, isStraightFlush,
+  isOfAKind, isFullHouse, isStraight, isTwoPair} from './handAlgorithms'
+import uuid from 'uuid'
 
 class Table extends Component {
   constructor (props) {
@@ -22,6 +25,14 @@ class Table extends Component {
     this.shuffle(this.props.deck)
   }
 
+  componentWillMount(){
+    /*let gamestate = {
+      _id: uuid(),
+      players: this.props.players,
+    }
+    axios.put(`/api/gamestate/`, gamestate)
+      .then(res => console.log(res));*/
+  }
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate () {
     if ((this.props.lastMove === 'both_checked' && this.props.flop.length === 5) ||
@@ -35,6 +46,7 @@ class Table extends Component {
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
     }
+
   }
 
   /* Deal two cards to each player then update state in store */
@@ -213,243 +225,59 @@ class Table extends Component {
     </div>
   )
 
-  isFlush (hand) {
-    let hearts = 0
-    let diamonds = 0
-    let spades = 0
-    let clubs = 0
-
-    for (let i = 0; i < hand.length; i++) {
-      switch (hand[i].suit) {
-        case 'HEART': hearts++
-          break
-        case 'DIAMOND': diamonds++
-          break
-        case 'CLUB': clubs++
-          break
-        case 'SPADE': spades++
-          break
-        default: break
-      }
-    }
-
-    if (hearts >= 5) {
-      return 'HEART'
-    } else if (diamonds >= 5) {
-      return 'DIAMOND'
-    } else if (spades >= 5) {
-      return 'SPADE'
-    } else if (clubs >= 5) {
-      return 'CLUB'
-    } else {
-      return 'NO_FLUSH'
-    }
-  }
-
-  isRoyalFlush (hand, suit) {
-    let ace = false
-    let king = false
-    let queen = false
-    let jack = false
-    let ten = false
-
-    for (let i = 0; i < hand.length; i++) {
-      if (hand[i].value === 14 && hand[i].suit === suit) {
-        ace = true
-      } else if (hand[i].value === 13 && hand[i].suit === suit) {
-        king = true
-      } else if (hand[i].value === 12 && hand[i].suit === suit) {
-        queen = true
-      } else if (hand[i].value === 11 && hand[i].suit === suit) {
-        jack = true
-      } else if (hand[i].value === 10 && hand[i].suit === suit) {
-        ten = true
-      }
-    }
-    if (ace && king && queen && jack && ten) {
-      return true
-    }
-    return false
-  }
-
-  isStraightFlush (h, suit) {
-    let hand = JSON.parse(JSON.stringify(h))
-    // Add ace with value 1 to check for other possible straights
-    for (let i = 0; i < hand.length; i++) {
-      if (hand[i].value === 14) {
-        hand.push({ card: <Card key={14} image={require('../../images/cards/ACE-D.png')} />, value: 1, suit: suit })
-      }
-    }
-
-    // Remove any duplicates which interfere with checking for straights
-    let ofAKinds = this.isOfAKind(hand)
-    for (let x = 0; x < ofAKinds.count - 1; x++) {
-      for (let y = 0; y < hand.length; y++) {
-        if (hand[y].value === ofAKinds.value &&
-          hand[y].suit !== suit) {
-          hand.splice(y, 1)
-        }
-      }
-    }
-
-    for (let j = 0; j < hand.length - 4; j++) {
-      if (hand[j + 1].value === hand[j].value + 1 &&
-        hand[j + 2].value === hand[j].value + 2 &&
-        hand[j + 3].value === hand[j].value + 3 &&
-        hand[j + 4].value === hand[j].value + 4 &&
-        hand[j].suit === suit && hand[j + 1].suit === suit &&
-        hand[j + 2].suit === suit && hand[j + 3].suit === suit &&
-        hand[j + 4].suit === suit) {
-        return true
-      }
-    }
-    return false
-  }
-
-  isOfAKind (hand) {
-    let count = 1
-    let value = 0
-    for (let i = 0; i < hand.length; i++) {
-      let tempCount = 1
-      for (let j = i + 1; j < hand.length; j++) {
-        if (hand[i].value === hand[j].value) {
-          tempCount++
-        }
-      }
-      if (tempCount >= 2 && tempCount > count) {
-        count = tempCount
-        value = hand[i].value
-      }
-    }
-    return {count, value}
-  }
-
-  isFullHouse (h) {
-    let hand = JSON.parse(JSON.stringify(h))
-    let threeOfAKind = false
-    let pair = false
-    for (let i = 0; i < hand.length - 2; i++) {
-      if (hand[i].value === hand[i + 1].value &&
-        hand[i].value === hand[i + 2].value) {
-        threeOfAKind = true
-        hand.splice(i, 3)
-      }
-    }
-
-    for (let j = 0; j < hand.length - 1; j++) {
-      if (hand[j].value === hand[j + 1].value) {
-        pair = true
-      }
-    }
-    if (threeOfAKind && pair) {
-      return true
-    }
-    return false
-  }
-
-  isStraight (h) {
-    let hand = JSON.parse(JSON.stringify(h))
-    // Add ace with value 1 to check for other possible straights
-    for (let i = 0; i < hand.length; i++) {
-      if (hand[i].value === 14) {
-        hand.push({ card: <Card key={14} image={require('../../images/cards/ACE-D.png')} />, value: 1, suit: hand[i].suit })
-      }
-    }
-    // Remove any duplicates which interfere with checking for straights
-    let ofAKinds = this.isOfAKind(hand)
-    for (let x = 0; x < ofAKinds.count - 1; x++) {
-      for (let y = 0; y < hand.length; y++) {
-        if (hand[y].value === ofAKinds.value) {
-          hand.splice(y, 1)
-        }
-      }
-    }
-
-    for (let j = 0; j < hand.length - 4; j++) {
-      if (hand[j + 1].value === hand[j].value + 1 &&
-        hand[j + 2].value === hand[j].value + 2 &&
-        hand[j + 3].value === hand[j].value + 3 &&
-        hand[j + 4].value === hand[j].value + 4) {
-        return true
-      }
-    }
-    return false
-  }
-
-  isTwoPair (h) {
-    let hand = JSON.parse(JSON.stringify(h))
-    let pairs = 0
-    for (let i = 0; i < hand.length - 1; i++) {
-      if (hand[i].value === hand[i + 1].value) {
-        pairs++
-        hand.splice(i, 2)
-      }
-    }
-
-    for (let j = 0; j < hand.length - 1; j++) {
-      if (hand[j].value === hand[j + 1].value) {
-        pairs++
-      }
-    }
-    if (pairs === 2) {
-      return true
-    }
-    return false
-  }
-
   /* Checks players hand against the flopped cards to determine what
-     the best hand the player can make and returns it as a string.
-     TODO: change this to return { type: string, value: number }
-  */
-  determineBestHand (player) {
-    const cards = player.hand.concat(this.props.flop).sort(function (a, b) {
-      return a.value - b.value
-    })
+   the best hand the player can make and returns it as a string.
+   TODO: change this to return { type: string, value: number }
+*/
+determineBestHand (player) {
+  const cards = player.hand.concat(this.props.flop).sort(function (a, b) {
+    return a.value - b.value
+  })
 
-    const flush = this.isFlush(cards)
-    const ofAkind = this.isOfAKind(cards)
+  const flush = isFlush(cards)
+  const ofAkind = isOfAKind(cards)
 
-    if (flush !== 'NO_FLUSH') {
-      if (this.isRoyalFlush(cards, flush)) {
-        return 'royal_flush_' + flush
-      } else if (this.isStraightFlush(cards, flush)) {
-        return 'straight_flush_' + flush
-      }
+  if (flush !== 'NO_FLUSH') {
+    if (isRoyalFlush(cards, flush)) {
+      return 'royal_flush_' + flush
+    } else if (isStraightFlush(cards, flush)) {
+      return 'straight_flush_' + flush
     }
-
-    if (ofAkind.count === 4) {
-      return 'four_of_a_kind_' + ofAkind.value
-    }
-
-    if (this.isFullHouse(cards)) {
-      return 'full_house'
-    }
-
-    if (flush !== 'NO_FLUSH') {
-      return 'flush_' + flush
-    }
-
-    if (this.isStraight(cards)) {
-      return 'straight'
-    }
-
-    if (ofAkind.count === 3) {
-      return 'three_of_a_kind_' + ofAkind.value
-    }
-
-    if (this.isTwoPair(cards)) {
-      return 'two_pair'
-    }
-
-    if (ofAkind.count === 2) {
-      return 'pair_' + ofAkind.value
-    }
-
-    const hand = player.hand.sort(function (a, b) {
-      return a.value - b.value
-    })
-    return 'high_card_' + hand[1].value + '_' + hand[1].suit
   }
+
+  if (ofAkind.count === 4) {
+    return 'four_of_a_kind_' + ofAkind.value
+  }
+
+  if (isFullHouse(cards)) {
+    return 'full_house'
+  }
+
+  if (flush !== 'NO_FLUSH') {
+    return 'flush_' + flush
+  }
+
+  if (isStraight(cards)) {
+    return 'straight'
+  }
+
+  if (ofAkind.count === 3) {
+    return 'three_of_a_kind_' + ofAkind.value
+  }
+
+  if (isTwoPair(cards)) {
+    return 'two_pair'
+  }
+
+  if (ofAkind.count === 2) {
+    return 'pair_' + ofAkind.value
+  }
+
+  const hand = player.hand.sort(function (a, b) {
+    return a.value - b.value
+  })
+  return 'high_card_' + hand[1].value + '_' + hand[1].suit
+}
 
   render () {
     return (

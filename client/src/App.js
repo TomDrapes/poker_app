@@ -1,17 +1,18 @@
 import React, { Component } from 'react'
 import './index.css'
-import Header from './components/header/Header'
-import Table from './components/game/Table'
-import Chat from './components/chat/chat'
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import LobbyView from './routes/lobby-view'
+import GameView from './routes/game-view'
 
 export default class App extends Component {
   render () {
     return (
-      <div className="App">
-        <Header />
-        <Table />
-        <Chat />
-      </div>
+      <BrowserRouter basename="/">
+        <Switch>
+          <Route exact path={`/`} render={props => <LobbyView {...props} />} />
+          <Route path={`/:gameid`} render={props => <GameView {...props} />} />
+        </Switch>
+      </BrowserRouter>
     )
   }
 }

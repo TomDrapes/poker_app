@@ -13,7 +13,12 @@ router.get('/', (req, res) => {
 });
 
 router.put('/', (req, res) => {
-  res.send('PUT request made')
+  const newGameState = new GameState({
+    _id: req.body._id,
+    players: req.body.players
+  });
+
+  newGameState.save();
 });
 
 module.exports = router;
