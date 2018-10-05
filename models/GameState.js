@@ -19,13 +19,16 @@ const GameStateSchema = new Schema({
     "default": []
   },
   bet: {
-    type: Number,
+    type: Number
   },
   lastMove: {
     type: String
   },
   pot: {
     type: Number
+  },
+  messages: {
+    type: Array
   }
 });
 

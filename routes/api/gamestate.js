@@ -25,7 +25,8 @@ router.put('/', (req, res) => {
     bet: req.body.bet,
     lastMove: req.body.lastMove,
     pot: req.body.pot,
-    deck: req.body.deck
+    deck: req.body.deck,
+    messages: req.body.messages
   });
   res.send("PUT request made")
 

@@ -15,16 +15,27 @@ app.use(bodyParser.json());
 //Socket.io
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+let clients = [];
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.on('disconnect', function(){
     console.log('User disconnected');
   });
 
-  socket.on('state_updated', function(playerId){
-    console.log(`${playerId} updated game state`);
-    io.sockets.emit('new_state_available');
+  socket.on('state_updated', function(){
+    console.log('Game state updated');
+    //io.sockets.connected[socketId].emit('new_state-available')
+    socket.broadcast.emit('new_state_available')
   });
+
+  socket.on('game_created', function(){
+    console.log('Starting new game...')
+    io.sockets.emit('new_state_available')
+  })
+
+  socket.on('new_message', function(){
+    socket.broadcast.emit('new_msg_available')
+  })
 });
 //io.listen(9000)
 http.listen(9000);

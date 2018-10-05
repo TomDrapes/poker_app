@@ -16,8 +16,6 @@ import { isFlush, isRoyalFlush, isStraightFlush,
   isOfAKind, isFullHouse, isStraight, isTwoPair} from './handAlgorithms'
 import uuid from 'uuid'
 
-import openSocket from 'socket.io-client'
-const socket = openSocket('http://localhost:9000')
 
 class Table extends Component {
   constructor (props) {
@@ -26,14 +24,13 @@ class Table extends Component {
     this.state = {
       betAmount: this.props.currentBet,
       loading: true,
+      socket: this.props.socket
     }
 
-    socket.on('new_state_available', () => {
+    this.state.socket.on('new_state_available', () => {
       console.log("Updating state...\n");
       this.receiveSocketIO();
     })
-
-    //this.shuffle(this.props.deck)
   }
 
   receiveSocketIO = () => {
@@ -52,8 +49,13 @@ class Table extends Component {
       })
   }
 
-  sendSocketIO = () => {
-    socket.emit('state_updated', this.props.localState.playerId)
+  sendSocketIO = (msg) => {
+    switch(msg) {
+      case 'new_game':
+        this.state.socket.emit('game_created')
+      case 'state_updated':
+        this.state.socket.emit('state_updated')
+    }
   }
 
   componentDidMount(){
@@ -82,7 +84,7 @@ class Table extends Component {
             .then(res => console.log(res))
             .catch(err => console.log(err))
 
-          this.sendSocketIO()
+          this.sendSocketIO('new_game')
           this.setState({
             loading: false
           })
@@ -113,13 +115,17 @@ class Table extends Component {
       pot: this.props.pot,
       flop: this.props.flop,
       deck: this.props.deck,
-      lastMove: this.props.lastMove
+      lastMove: this.props.lastMove,
+      messages: this.props.messages
     }
     axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
-      .then(res => console.log(res))
+      .then(res => {
+        console.log(res)
+        this.sendSocketIO('state_updated')
+      })
       .catch(err => console.log(err))
 
-    this.sendSocketIO()
+
   }
 
   createNewGame() {
@@ -131,7 +137,8 @@ class Table extends Component {
       bet: 10,
       lastMove: '',
       pot: 0,
-      deck: this.props.localState.deck.map(card => card.key)
+      deck: this.props.localState.deck.map(card => card.key),
+      messages: []
     }
     axios.put(`/api/gamestate/`, newGameState)
       .then(res => console.log(res))
@@ -181,7 +188,9 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdateFlop(flop)
     this.props.onUpdateLastMove('flopped')
-    this.updateDatabase()
+    setTimeout(() => {
+      this.updateDatabase()
+    },2000)
   }
 
   /* Returns array of the players cards to be displayed */
@@ -197,8 +206,8 @@ class Table extends Component {
   opponentsHand () {
     return (
       [
-        <Card image={require('../../images/cards/back.png')} />,
-        <Card image={require('../../images/cards/back.png')} />,
+        <Card image={require('../../images/cards/back.png')} key={0}/>,
+        <Card image={require('../../images/cards/back.png')} key={1}/>,
       ]
     )
   }
@@ -283,6 +292,9 @@ class Table extends Component {
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdateBet(this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
+      setTimeout(() => {
+        this.updateDatabase()
+      }, 2000)
 
     // Last Move was a bet/raise and player calling
     } else if ((this.state.betAmount === this.props.currentBet && this.props.lastMove === 'bet') ||
@@ -298,8 +310,6 @@ class Table extends Component {
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
     }
-
-    this.updateDatabase()
   }
 
   /* Player folds */
@@ -336,7 +346,19 @@ class Table extends Component {
    TODO: change this to return { type: string, value: number }
 */
 determineBestHand (player) {
-  const cards = player.hand.concat(this.props.flop).sort(function (a, b) {
+  const playersHand = player.hand.map(key => {
+    return(
+      this.props.localState.deck[key-1]
+    )
+  })
+
+  let flop = this.props.flop.map(key => {
+    return(
+      this.props.localState.deck[key-1]
+    )
+  })
+
+  const cards = playersHand.concat(flop).sort(function (a, b) {
     return a.value - b.value
   })
 
@@ -379,7 +401,7 @@ determineBestHand (player) {
     return 'pair_' + ofAkind.value
   }
 
-  const hand = player.hand.sort(function (a, b) {
+  const hand = playersHand.sort(function (a, b) {
     return a.value - b.value
   })
   return 'high_card_' + hand[1].value + '_' + hand[1].suit
@@ -406,7 +428,7 @@ determineBestHand (player) {
             <div className="flopWrapper">
               <div className="flop">
                 <Deck />
-                {this.props.flop.map(x => x.card)}
+                {this.props.flop.map(key => this.props.localState.deck[key-1].card)}
                 <div className="clear" />
               </div>
             </div>

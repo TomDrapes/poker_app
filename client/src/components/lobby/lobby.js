@@ -117,7 +117,7 @@ class Lobby extends Component {
     }
     const games = this.state.games.map((game) => {
       return(
-        <li  className="game-url" onClick={() => this.enterGame(game, 2)}>{game}</li>
+        <li  className="game-url" key={game} onClick={() => this.enterGame(game, 2)}>{game}</li>
       );
     });
     return(
