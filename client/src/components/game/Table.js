@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import Deck from './deck'
 import axios from 'axios'
 import Card from './card'
+import Spinner from './spinner'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
@@ -10,29 +11,85 @@ import { updatePlayer, updatePlayersTurn, updateChipCount, wonPot } from '../../
 import { updateBet } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
+import { updateGameId } from '../../Actions/LocalStateActions'
 import { isFlush, isRoyalFlush, isStraightFlush,
   isOfAKind, isFullHouse, isStraight, isTwoPair} from './handAlgorithms'
 import uuid from 'uuid'
+
+import openSocket from 'socket.io-client'
+const socket = openSocket('http://localhost:9000')
 
 class Table extends Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      betAmount: this.props.currentBet
+      betAmount: this.props.currentBet,
+      loading: true,
     }
 
-    this.shuffle(this.props.deck)
+    socket.on('new_state_available', () => {
+      console.log("Updating state...\n");
+      this.receiveSocketIO();
+    })
+
+    //this.shuffle(this.props.deck)
   }
 
-  componentWillMount(){
-    /*let gamestate = {
-      _id: uuid(),
-      players: this.props.players,
-    }
-    axios.put(`/api/gamestate/`, gamestate)
-      .then(res => console.log(res));*/
+  receiveSocketIO = () => {
+    axios.get(`/api/gamestate/${this.props.localState.gameId}`)
+      .then(res => {
+        this.props.onUpdateBet(res.data.bet)
+        this.props.onUpdatePlayer(res.data.players)
+        this.props.onUpdateFlop(res.data.flop)
+        this.props.onUpdateLastMove(res.data.lastMove)
+        this.props.onUpdatePot(res.data.pot)
+        this.props.onUpdateDeck(res.data.deck)
+        this.setState({ loading: false })
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
+
+  sendSocketIO = () => {
+    socket.emit('state_updated', this.props.localState.playerId)
+  }
+
+  componentDidMount(){
+
+    if(this.props.localState.playerId === 1){
+      console.log("player 1 waiting for player 2")
+      this.createNewGame();
+    }else if(this.props.localState.playerId === 2){
+      console.log("player 2 connected")
+      axios.get(`/api/gamestate/${this.props.localState.gameId}`)
+        .then(res => {
+          let p = res.data.players
+          p.push(this.props.players[0])
+          this.props.onUpdatePlayer(p)
+
+          this.shuffle(res.data.deck)
+
+          let gameState = {
+            ...res.data,
+            players: this.props.players,
+            lastMove: this.props.lastMove,
+            deck: this.props.deck
+          }
+
+          axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
+            .then(res => console.log(res))
+            .catch(err => console.log(err))
+
+          this.sendSocketIO()
+          this.setState({
+            loading: false
+          })
+        }).catch(err => console.log(err))
+    }
+  }
+
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate () {
     if ((this.props.lastMove === 'both_checked' && this.props.flop.length === 5) ||
@@ -46,7 +103,39 @@ class Table extends Component {
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
     }
+  }
 
+  updateDatabase() {
+    let gameState = {
+      _id: this.props.localState.gameId,
+      players: this.props.players,
+      bet: this.props.bet,
+      pot: this.props.pot,
+      flop: this.props.flop,
+      deck: this.props.deck,
+      lastMove: this.props.lastMove
+    }
+    axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
+
+    this.sendSocketIO()
+  }
+
+  createNewGame() {
+    //Create game state
+    let newGameState = {
+      _id: this.props.localState.gameId,
+      players: this.props.players,
+      flop: [],
+      bet: 10,
+      lastMove: '',
+      pot: 0,
+      deck: this.props.localState.deck.map(card => card.key)
+    }
+    axios.put(`/api/gamestate/`, newGameState)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
   }
 
   /* Deal two cards to each player then update state in store */
@@ -62,6 +151,7 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdatePlayer(p)
     this.props.onUpdateLastMove('dealt')
+    this.updateDatabase()
   }
 
   shuffle (deck) {
@@ -91,27 +181,41 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdateFlop(flop)
     this.props.onUpdateLastMove('flopped')
+    this.updateDatabase()
   }
 
   /* Returns array of the players cards to be displayed */
   playersHand (player) {
-    if (player.hand.length === 2) {
-      return player.hand.map(x => x.card)
+    if(player){
+      if (player.hand.length === 2) {
+        return player.hand.map(key => this.props.localState.deck[key-1].card)
+      }
     }
     return null
   }
 
+  opponentsHand () {
+    return (
+      [
+        <Card image={require('../../images/cards/back.png')} />,
+        <Card image={require('../../images/cards/back.png')} />,
+      ]
+    )
+  }
+
   /* JSX to enable players buttons if it's their turn */
   playerButtons (player) {
-    if (player.playersTurn) {
-      return (
-        <div>
-          {this.checkButton()}
-          <button className="foldBtn" onClick ={() => this.fold(player)}>FOLD</button>
-          <button type="button" className="betBtn" onClick={() => this.bet(player)}>BET</button>
-          {this.betIncrementor(player)}
-        </div>
-      )
+    if(player){
+      if (player.playersTurn) {
+        return (
+          <div>
+            {this.checkButton()}
+            <button className="foldBtn" onClick ={() => this.fold(player)}>FOLD</button>
+            <button type="button" className="betBtn" onClick={() => this.bet(player)}>BET</button>
+            {this.betIncrementor(player)}
+          </div>
+        )
+      }
     }
     return (
       <div>
@@ -194,6 +298,8 @@ class Table extends Component {
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
     }
+
+    this.updateDatabase()
   }
 
   /* Player folds */
@@ -282,39 +388,47 @@ determineBestHand (player) {
   render () {
     return (
       <div className="table">
-        <div className="gameWindow">
-          <div className="oppSide">
-            {this.playerButtons(this.props.players[1])}
-            <div className="oppName">
-              <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip" />
-              {this.props.players[1].chipCount}
-            </div>
-            {this.playersHand(this.props.players[1])}
-            <div className="clear" />
+        { this.state.loading ?
+          <div className="gameWindow">
+            <Spinner msg={"Waiting for opponent to join..."}/>
           </div>
-          <div className="flopWrapper">
-            <div className="flop">
-              <Deck />
-              {this.props.flop.map(x => x.card)}
-              <div className="clear" />
-            </div>
-          </div>
-          <div className="playerSide">
-            {this.playersHand(this.props.players[0])}
-            <div className="btnWrapper">
-              <div className="statusMsg">Jerry {this.props.lastMove} {this.props.currentBet}</div>
-              <div className="clear" />
-              <div className="playerName">
-                <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip"/>
-                {this.props.players[0].chipCount}
+          :
+          <div className="gameWindow">
+            <div className="oppSide">
+              {/*this.props.players[1] && this.playerButtons(this.props.players[1])*/}
+              <div className="oppName">
+                <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip" />
+                {this.props.players[1] && this.props.players[1].chipCount }
               </div>
+              {this.props.players[1] && this.opponentsHand()}
               <div className="clear" />
-              {this.playerButtons(this.props.players[0])}
             </div>
-            <div>Pot:{this.props.pot} CurrentBet:{this.props.currentBet}</div>
-            <div className="clear" />
+            <div className="flopWrapper">
+              <div className="flop">
+                <Deck />
+                {this.props.flop.map(x => x.card)}
+                <div className="clear" />
+              </div>
+            </div>
+            <div className="playerSide">
+              {this.props.players[this.props.localState.playerId-1] &&
+                 this.playersHand(this.props.players[this.props.localState.playerId-1])}
+              <div className="btnWrapper">
+                <div className="statusMsg">Jerry {this.props.lastMove} {this.props.currentBet}</div>
+                <div className="clear" />
+                <div className="playerName">
+                  <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip"/>
+                  {this.props.players[0] ? this.props.players[0].chipCount : null}
+                </div>
+                <div className="clear" />
+                {this.props.players[0] &&
+                  this.playerButtons(this.props.players[this.props.localState.playerId-1])}
+              </div>
+              <div>Pot:{this.props.pot} CurrentBet:{this.props.currentBet}</div>
+              <div className="clear" />
+            </div>
           </div>
-        </div>
+        }
       </div>
     )
   }
@@ -323,12 +437,14 @@ determineBestHand (player) {
 /* Redux: map state in store to props for easy access */
 const mapStateToProps = (state) => {
   return {
+    gameId: state.gameId,
     players: state.players,
     deck: state.deck,
     flop: state.flop,
     currentBet: state.bet,
     lastMove: state.lastMove,
-    pot: state.pot
+    pot: state.pot,
+    localState: state.localState
   }
 }
 
@@ -343,7 +459,8 @@ const mapActionsToProps = {
   onUpdateChipCount: updateChipCount,
   onUpdatePot: updatePot,
   onWonPot: wonPot,
-  onResetFlop: resetFlop
+  onResetFlop: resetFlop,
+  onUpdateGameId: updateGameId,
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Table)

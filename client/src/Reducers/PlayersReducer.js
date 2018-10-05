@@ -7,8 +7,10 @@ import {
 
 export default function playersReducer (state = [], action = {}) {
   switch (action.type) {
+
     case UPDATE_PLAYER:
       return action.payload.players
+
     case UPDATE_TURN:
       const updatedTurn = state.map(player => {
         if (player.name === action.name) {
@@ -19,6 +21,7 @@ export default function playersReducer (state = [], action = {}) {
         return player
       })
       return updatedTurn
+
     case UPDATE_CHIP_COUNT:
       const updatedChipCount = state.map(player => {
         if (player.name === action.name) {
@@ -30,6 +33,7 @@ export default function playersReducer (state = [], action = {}) {
         return player
       })
       return updatedChipCount
+
     case WON_POT:
       const wonPot = state.map(player => {
         if (player.name === action.name) {

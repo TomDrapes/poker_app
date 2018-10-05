@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //Bodyparser Middelware
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 
 //Socket.io
@@ -21,9 +21,9 @@ io.on('connection', function(socket){
     console.log('User disconnected');
   });
 
-  socket.on('example_message', function(msg){
-    console.log('message: ' + msg);
-    io.sockets.emit('change');
+  socket.on('state_updated', function(playerId){
+    console.log(`${playerId} updated game state`);
+    io.sockets.emit('new_state_available');
   });
 });
 //io.listen(9000)

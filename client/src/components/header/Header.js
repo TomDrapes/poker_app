@@ -11,7 +11,7 @@ export default class Header extends Component {
           <Connection name="John" status="connected"></Connection>
           <Connection name="Jerry" status="connected" />
         </span>
-        <div className="clear" />
+        {/*<div className="clear" />*/}
       </div>
     )
   }

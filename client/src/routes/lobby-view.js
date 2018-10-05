@@ -5,7 +5,7 @@ import Lobby from '../components/lobby/lobby'
 export default class LobbyView extends Component {
   render() {
     return(
-      <div>
+      <div className="App">
         <Header />
         <Lobby />
       </div>

@@ -10,7 +10,7 @@ export default class App extends Component {
       <BrowserRouter basename="/">
         <Switch>
           <Route exact path={`/`} render={props => <LobbyView {...props} />} />
-          <Route path={`/:gameid`} render={props => <GameView {...props} />} />
+          <Route path={`/:gameid`} render={props => <GameView {...props}/>} />
         </Switch>
       </BrowserRouter>
     )

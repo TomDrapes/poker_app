@@ -35,19 +35,3 @@ export function wonPot (player, pot) {
     payload: player.chipCount + pot
   }
 }
-
-/* export function apiRequest () {
-  return dispatch => {
-    $.ajax({
-      url: 'http://google.com',
-      success (response) {
-        console.log('SUCESS')
-
-        dispatch(updatePlayer(response.newPlayer))
-      },
-      error () {
-        console.log('ERROR')
-      }
-    })
-  }
-} */

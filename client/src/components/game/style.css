@@ -157,3 +157,17 @@
 .pokerChip{
   margin-right: 10px;
 }
+
+.spinner {
+  margin: 0 auto;
+  width: auto;
+  font-size: 86px;
+  margin-top: 15%;
+  color: white;
+  text-align: center;
+}
+
+.spinner-text {
+  font-size: 32px;
+  margin: 30px;
+}
