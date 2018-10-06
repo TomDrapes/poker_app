@@ -59,9 +59,13 @@ class Table extends Component {
     }
   }
 
-  componentDidMount(){
+  componentWillReceiveProps(){
+    this.setState({ betAmount: this.props.currentBet })
+  }
 
+  componentDidMount(){
     if(this.props.localState.playerId === 1){
+      console.log(this.props)
       console.log("player 1 waiting for player 2")
       this.createNewGame();
     }else if(this.props.localState.playerId === 2){
@@ -70,6 +74,7 @@ class Table extends Component {
         .then(res => {
           let p = res.data.players
           p.push(this.props.players[0])
+
           this.props.onUpdatePlayer(p)
 
           this.shuffle(res.data.deck)
@@ -95,8 +100,9 @@ class Table extends Component {
 
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate () {
+
     if ((this.props.lastMove === 'both_checked' && this.state.flop === 6) ||
-      (this.props.lastMove === 'called' && this.state.flop === 6)) {
+      (this.props.lastMove === 'called' && this.state.flop === 5)) {
       this.showCards()
     } else if (this.props.lastMove === 'called') {
       this.flop()
@@ -111,7 +117,7 @@ class Table extends Component {
     let gameState = {
       _id: this.props.localState.gameId,
       players: this.props.players,
-      bet: this.props.bet,
+      bet: this.props.currentBet,
       pot: this.props.pot,
       flop: this.props.flop,
       deck: this.props.deck,
@@ -217,7 +223,7 @@ class Table extends Component {
   }
 
   /* JSX to enable players buttons if it's their turn */
-  playerButtons (player) {
+  playerButtons (player, betAmount) {
     if(player){
       if (player.playersTurn) {
         return (
@@ -225,7 +231,7 @@ class Table extends Component {
             {this.checkButton()}
             <button className="foldBtn" onClick ={() => this.fold(player)}>FOLD</button>
             <button type="button" className="betBtn" onClick={() => this.bet(player)}>BET</button>
-            {this.betIncrementor(player)}
+            {this.betIncrementor(player, betAmount)}
           </div>
         )
       }
@@ -309,6 +315,9 @@ class Table extends Component {
       this.props.onUpdateLastMove('called')
       this.props.onUpdateChipCount(player, this.props.currentBet)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
+      setTimeout(() => {
+        this.updateDatabase()
+      }, 2000)
 
     // Last move was a bet and player is raising
     } else if (this.props.lastMove === 'bet' && this.state.betAmount > this.props.currentBet) {
@@ -316,6 +325,9 @@ class Table extends Component {
       this.props.onUpdateLastMove('raised')
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
+      setTimeout(() => {
+        this.updateDatabase()
+      }, 2000)
     }
   }
 
@@ -340,10 +352,10 @@ class Table extends Component {
   }
 
   // Bet incrementor component
-  betIncrementor = (player) => (
+  betIncrementor = (player, betAmount) => (
     <div className="betAmount">
       <i className="fa fa-caret-up" onClick={() => this.increaseBet(player)} />
-      <div>{this.state.betAmount}</div>
+      <div>{betAmount}</div>
       <i className="fa fa-caret-down" onClick={() => this.decreaseBet()} />
     </div>
   )
@@ -381,21 +393,23 @@ class Table extends Component {
     this.props.onUpdatePlayersTurn(this.props.players[0])
   }
 
-opponent(){
-  if(this.props.localState.playerId === 1){
-    return 1
+  opponent(){
+    if(this.props.localState.playerId === 1){
+      return 1
+    }
+    return 0
   }
-  return 0
-}
 
   render () {
     return (
       <div className="table">
-        { this.state.loading ?
+        { this.state.loading &&
           <div className="gameWindow">
             <Spinner msg={"Waiting for opponent to join..."}/>
           </div>
-          :
+        }
+
+        { !this.state.loading &&
           <div className="gameWindow">
 
             <div className='status'>
@@ -434,7 +448,7 @@ opponent(){
                 </div>
                 <div className="clear" />
                 {this.props.players[0] &&
-                  this.playerButtons(this.props.players[this.props.localState.playerId-1])}
+                  this.playerButtons(this.props.players[this.props.localState.playerId-1], this.state.betAmount)}
               </div>
               <div className="clear" />
             </div>
