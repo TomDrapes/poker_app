@@ -158,7 +158,9 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdatePlayer(p)
     this.props.onUpdateLastMove('dealt')
-    this.updateDatabase()
+    setTimeout(() => {
+      this.updateDatabase()
+    },2000)
   }
 
   shuffle (deck) {
@@ -260,6 +262,9 @@ class Table extends Component {
       this.props.onUpdatePlayersTurn(this.props.players[1])
       this.props.onUpdatePlayersTurn(this.props.players[0])
     }
+    setTimeout(() => {
+      this.updateDatabase()
+    },2000)
   }
 
   /* Increment bet amount and update local state */
@@ -407,6 +412,13 @@ determineBestHand (player) {
   return 'high_card_' + hand[1].value + '_' + hand[1].suit
 }
 
+opponent(){
+  if(this.props.localState.playerId === 1){
+    return 1
+  }
+  return 0
+}
+
   render () {
     return (
       <div className="table">
@@ -417,12 +429,14 @@ determineBestHand (player) {
           :
           <div className="gameWindow">
             <div className="oppSide">
-              {/*this.props.players[1] && this.playerButtons(this.props.players[1])*/}
               <div className="oppName">
+                <div>
+                  {this.props.players[this.opponent()] && this.props.players[this.opponent()].name}
+                </div>
                 <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip" />
-                {this.props.players[1] && this.props.players[1].chipCount }
+                {this.props.players[this.opponent()] && this.props.players[this.opponent()].chipCount }
               </div>
-              {this.props.players[1] && this.opponentsHand()}
+              {this.props.players[this.opponent()] && this.opponentsHand()}
               <div className="clear" />
             </div>
             <div className="flopWrapper">
@@ -436,11 +450,12 @@ determineBestHand (player) {
               {this.props.players[this.props.localState.playerId-1] &&
                  this.playersHand(this.props.players[this.props.localState.playerId-1])}
               <div className="btnWrapper">
-                <div className="statusMsg">Jerry {this.props.lastMove} {this.props.currentBet}</div>
+                <div className="statusMsg">{this.props.players[this.props.localState.playerId-1].name}</div>
                 <div className="clear" />
                 <div className="playerName">
                   <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip"/>
-                  {this.props.players[0] ? this.props.players[0].chipCount : null}
+                  {this.props.players[this.props.localState.playerId-1] &&
+                    this.props.players[this.props.localState.playerId-1].chipCount}
                 </div>
                 <div className="clear" />
                 {this.props.players[0] &&
