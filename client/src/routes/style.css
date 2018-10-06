@@ -1,0 +1,14 @@
+.barchart {
+  margin: 0 auto;
+  width: 100%;
+  border: 1px solid greenyellow;
+  padding: 20px;
+}
+
+.statsView {
+  padding: 50px;
+  text-align: center;
+  background-color: black;
+  color: white;
+  height: 100vh;
+}
