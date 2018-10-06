@@ -36,6 +36,10 @@ io.on('connection', function(socket){
   socket.on('new_message', function(){
     socket.broadcast.emit('new_msg_available')
   })
+
+  socket.on('message_pending', function(){
+    socket.broadcast.emit('message_pending')
+  })
 });
 //io.listen(9000)
 http.listen(9000);

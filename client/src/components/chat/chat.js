@@ -12,30 +12,52 @@ class Chat extends Component {
 
     this.state = {
       msg: '',
-      socket: this.props.socket
+      socket: this.props.socket,
+      msg_pending: false
     }
 
     this.state.socket.on('new_msg_available', () => {
-      this.receiveSocketIO()
+      this.receiveSocketIO('new_msg_available')
+    })
+
+    this.state.socket.on('message_pending', () => {
+      this.receiveSocketIO('message_pending')
     })
   }
 
-  receiveSocketIO = () => {
-    axios.get(`/api/gamestate/${this.props.gameId}`)
-      .then(res => {
-        console.log("here")
-        console.log(res)
-        this.props.onUpdateMessages(res.data.messages)
-      })
-      .catch(err => console.log(err))
+  receiveSocketIO = (status) => {
+    if(status === 'new_msg_available'){
+      axios.get(`/api/gamestate/${this.props.gameId}`)
+        .then(res => {
+          console.log("here")
+          console.log(res)
+          this.props.onUpdateMessages(res.data.messages)
+        })
+        .catch(err => console.log(err))
+    }else if(status === 'message_pending'){
+      this.setState({ msg_pending: true })
+      setTimeout(() => {
+        this.setState({ msg_pending: false})
+      }, 5000)
+    }
   }
 
-  sendSocketIO = (msg) => {
-    this.state.socket.emit('new_message')
+  sendSocketIO = (status) => {
+    this.state.socket.emit(status)
   }
 
   onInputChange (msg) {
     this.setState({msg})
+    this.sendSocketIO('message_pending')
+  }
+
+  opponentName(){
+    if(this.props.players[0] && this.props.players[1]){
+      if(this.props.playerId === 1){
+        return this.props.players[1].name
+      }
+      return this.props.players[0].name
+    }
   }
 
   messages() {
@@ -68,7 +90,7 @@ class Chat extends Component {
       axios.put(`/api/gamestate/${this.props.gameId}`, gameState)
         .then(res => {
           console.log(res)
-          this.sendSocketIO()
+          this.sendSocketIO('new_message')
         }).catch(err => console.log(err))
 
     }, 2000)
@@ -79,6 +101,11 @@ class Chat extends Component {
       <div className="chatWindow">
         <div className="messageWindow">
           {this.messages()}
+        </div>
+        <div>
+          {this.state.msg_pending ?
+            <div className="msg-status">{this.opponentName()} is typing...</div> :
+            <div className="msg-status">&spades;&clubs;&diams;&hearts;</div>}
         </div>
         <div className="chatInputWrapper">
           <form id='message_form' onSubmit={this.submit} className='input-group'>

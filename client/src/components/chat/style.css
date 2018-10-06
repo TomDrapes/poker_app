@@ -5,13 +5,23 @@
   float: left;
 }
 .messageWindow{
-  height: 83.5vh;
+  height: 90%;
   overflow-y: scroll;
 }
 .chatInputWrapper{
-  height: 100%;
+  height: 4%;
   width: 100%;
+  clear: both;
 }
+
+.msg-status{
+  height: 3%;
+  font-size: 12px;
+  float: right;
+  color: rgb(164, 164, 164);
+  padding-right: 5px;
+}
+
 .message{
   padding: 5px;
 }
