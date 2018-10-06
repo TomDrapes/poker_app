@@ -113,7 +113,7 @@ class Lobby extends Component {
 
   render () {
     if(this.state.redirect){
-      return ( <Redirect push to={`./${this.state.gameId}`} /> )
+      return ( <Redirect push to={`./game/${this.state.gameId}`} /> )
     }
     const games = this.state.games.map((game) => {
       return(

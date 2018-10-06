@@ -13,7 +13,7 @@ import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
 import { updateGameId } from '../../Actions/LocalStateActions'
 import { isFlush, isRoyalFlush, isStraightFlush,
-  isOfAKind, isFullHouse, isStraight, isTwoPair} from './handAlgorithms'
+  isOfAKind, isFullHouse, isStraight, isTwoPair, determineBestHand} from './handAlgorithms'
 import uuid from 'uuid'
 
 
@@ -24,7 +24,8 @@ class Table extends Component {
     this.state = {
       betAmount: this.props.currentBet,
       loading: true,
-      socket: this.props.socket
+      socket: this.props.socket,
+      flop: 0
     }
 
     this.state.socket.on('new_state_available', () => {
@@ -94,13 +95,12 @@ class Table extends Component {
 
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate () {
-    if ((this.props.lastMove === 'both_checked' && this.props.flop.length === 5) ||
-      (this.props.lastMove === 'called' && this.props.flop.length === 5)) {
-      console.log(this.determineBestHand(this.props.players[1]))
-      console.log(this.determineBestHand(this.props.players[0]))
+    if ((this.props.lastMove === 'both_checked' && this.state.flop === 6) ||
+      (this.props.lastMove === 'called' && this.state.flop === 6)) {
+      this.showCards()
     } else if (this.props.lastMove === 'called') {
       this.flop()
-    } else if (this.props.lastMove === 'folded') {
+    } else if (this.props.lastMove === 'folded' || this.props.lastMove === 'round_completed') {
       this.shuffle(this.props.deck)
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
@@ -158,6 +158,7 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdatePlayer(p)
     this.props.onUpdateLastMove('dealt')
+    this.setState({ flop: 0 })
     setTimeout(() => {
       this.updateDatabase()
     },2000)
@@ -190,6 +191,7 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdateFlop(flop)
     this.props.onUpdateLastMove('flopped')
+    this.setState({ flop: this.state.flop + 1 })
     setTimeout(() => {
       this.updateDatabase()
     },2000)
@@ -346,71 +348,38 @@ class Table extends Component {
     </div>
   )
 
-  /* Checks players hand against the flopped cards to determine what
-   the best hand the player can make and returns it as a string.
-   TODO: change this to return { type: string, value: number }
-*/
-determineBestHand (player) {
-  const playersHand = player.hand.map(key => {
-    return(
-      this.props.localState.deck[key-1]
+  showCards () {
+    let p1Hand = determineBestHand(
+      this.props.players[0].hand, this.props.flop, this.props.localState.deck
     )
-  })
-
-  let flop = this.props.flop.map(key => {
-    return(
-      this.props.localState.deck[key-1]
+    let p2Hand = determineBestHand(
+      this.props.players[1].hand, this.props.flop, this.props.localState.deck
     )
-  })
-
-  const cards = playersHand.concat(flop).sort(function (a, b) {
-    return a.value - b.value
-  })
-
-  const flush = isFlush(cards)
-  const ofAkind = isOfAKind(cards)
-
-  if (flush !== 'NO_FLUSH') {
-    if (isRoyalFlush(cards, flush)) {
-      return 'royal_flush_' + flush
-    } else if (isStraightFlush(cards, flush)) {
-      return 'straight_flush_' + flush
+    console.log(
+      this.props.players[0].name +' has ' + p1Hand.type + '\n' +
+      this.props.players[1].name + ' had ' + p2Hand.type + '\n'
+    )
+    if(p1Hand.value > p2Hand.value){
+      console.log(this.props.players[0].name + ' wins the pot\n')
+      this.props.onWonPot(this.props.players[0], this.props.pot)
+    }else if(p2Hand.value > p1Hand.value){
+      console.log(this.props.players[1].name + ' wins the pot\n')
+      this.props.onWonPot(this.props.players[1], this.props.pot)
+    }else{
+      console.log('Draw')
+      this.props.onWonPot(this.props.players[0], this.props.pot/2)
+      this.props.onWonPot(this.props.players[1], this.props.pot/2)
     }
-  }
 
-  if (ofAkind.count === 4) {
-    return 'four_of_a_kind_' + ofAkind.value
+    // Revert bet amount back to start state locally and in store */
+    this.props.onUpdateBet(10)
+    this.setState({ betAmount: 10 })
+    // Update state in store
+    this.props.onUpdateLastMove('round_completed')
+    this.props.onUpdatePot(0)
+    this.props.onUpdatePlayersTurn(this.props.players[1])
+    this.props.onUpdatePlayersTurn(this.props.players[0])
   }
-
-  if (isFullHouse(cards)) {
-    return 'full_house'
-  }
-
-  if (flush !== 'NO_FLUSH') {
-    return 'flush_' + flush
-  }
-
-  if (isStraight(cards)) {
-    return 'straight'
-  }
-
-  if (ofAkind.count === 3) {
-    return 'three_of_a_kind_' + ofAkind.value
-  }
-
-  if (isTwoPair(cards)) {
-    return 'two_pair'
-  }
-
-  if (ofAkind.count === 2) {
-    return 'pair_' + ofAkind.value
-  }
-
-  const hand = playersHand.sort(function (a, b) {
-    return a.value - b.value
-  })
-  return 'high_card_' + hand[1].value + '_' + hand[1].suit
-}
 
 opponent(){
   if(this.props.localState.playerId === 1){
@@ -428,6 +397,12 @@ opponent(){
           </div>
           :
           <div className="gameWindow">
+
+            <div className='status'>
+            { this.props.players[this.props.localState.playerId-1].playersTurn && <div>Your turn</div> }
+            { !this.props.players[this.props.localState.playerId-1].playersTurn && this.props.players[this.opponent()] && <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.players[this.opponent()].name}</div>}
+            </div>
+            <div className="pot">Pot: {this.props.pot}</div>
             <div className="oppSide">
               <div className="oppName">
                 <div>
@@ -461,7 +436,6 @@ opponent(){
                 {this.props.players[0] &&
                   this.playerButtons(this.props.players[this.props.localState.playerId-1])}
               </div>
-              <div>Pot:{this.props.pot} CurrentBet:{this.props.currentBet}</div>
               <div className="clear" />
             </div>
           </div>

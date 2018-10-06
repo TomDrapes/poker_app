@@ -8,7 +8,7 @@
   height: 90vh;
   background-image: radial-gradient(circle, rgb(5,110,27), rgb(2, 72, 17));
   float: left;
-  padding-top:40px;
+  padding-top:15px;
 }
 
 .cardWrapper {
@@ -170,4 +170,14 @@
 .spinner-text {
   font-size: 32px;
   margin: 30px;
+}
+
+.pot {
+  color: white;
+  margin-left: 10px;
+}
+
+.status {
+  color: white;
+  margin-left: 10px;
 }
