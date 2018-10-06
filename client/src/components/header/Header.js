@@ -1,18 +1,28 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import Connection from './Connection'
 import './style.css'
 
-export default class Header extends Component {
+class Header extends Component {
+
   render () {
+    console.log(this.props.players)
     return (
       <div className="headerWrapper">
         <span>
           <img src={require('../../images/Poker-logo-white.png')} height='80' alt="logo" />
-          <Connection name="John" status="connected"></Connection>
-          <Connection name="Jerry" status="connected" />
+          {this.props.players[0] && <Connection name={this.props.players[0].name} />}
+          {this.props.players[1] && <Connection name={this.props.players[1].name} />}
         </span>
-        {/*<div className="clear" />*/}
       </div>
     )
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    players: state.players
+  }
+}
+
+export default connect(mapStateToProps)(Header)
