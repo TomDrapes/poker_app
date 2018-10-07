@@ -11,7 +11,7 @@ import { updatePlayer, updatePlayersTurn, updateChipCount, wonPot } from '../../
 import { updateBet } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
-import { updateGameId } from '../../Actions/LocalStateActions'
+import { updateGameId, updatePlayerId } from '../../Actions/LocalStateActions'
 import { isFlush, isRoyalFlush, isStraightFlush,
   isOfAKind, isFullHouse, isStraight, isTwoPair, determineBestHand} from './handAlgorithms'
 import uuid from 'uuid'
@@ -34,6 +34,7 @@ class Table extends Component {
     })
   }
 
+  /* Update state in redux when client receives signal that new state is available */
   receiveSocketIO = () => {
     axios.get(`/api/gamestate/${this.props.localState.gameId}`)
       .then(res => {
@@ -50,6 +51,7 @@ class Table extends Component {
       })
   }
 
+  /* Get server to broadcast to opponent that either a game is created or state has been updated */
   sendSocketIO = (msg) => {
     switch(msg) {
       case 'new_game':
@@ -59,17 +61,22 @@ class Table extends Component {
     }
   }
 
+  /* Update current bet amount in local state if opponent raises */
   componentWillReceiveProps(){
     this.setState({ betAmount: this.props.currentBet })
   }
 
+  /* When component mounts there are 3 cases:
+    1: Mounting for player 1 in which case new game state is created and then wait for player 2
+    2: Mounting for player 2 - perform http request to retrieve game state and also update game state with player 2 info
+    3: Returning to game after closing tab - retrieve data from localStorage to then perform http request for game data
+  */
   componentDidMount(){
     if(this.props.localState.playerId === 1){
-      console.log(this.props)
-      console.log("player 1 waiting for player 2")
+      this.saveStateLocally()
       this.createNewGame();
     }else if(this.props.localState.playerId === 2){
-      console.log("player 2 connected")
+      this.saveStateLocally()
       axios.get(`/api/gamestate/${this.props.localState.gameId}`)
         .then(res => {
           let p = res.data.players
@@ -95,6 +102,9 @@ class Table extends Component {
             loading: false
           })
         }).catch(err => console.log(err))
+    }else if(window.location.pathname === `/game/${localStorage.getItem('gameId')}`){
+      this.retrieveLocalStorage()
+      console.log('retrieving')
     }
   }
 
@@ -111,6 +121,29 @@ class Table extends Component {
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
     }
+  }
+
+  saveStateLocally(){
+    localStorage.setItem('gameId', this.props.localState.gameId)
+    localStorage.setItem('playerId', this.props.localState.playerId)
+  }
+
+  /* Retrieve playerId and gameId from localStorage and then perform http request for game state data */
+  retrieveLocalStorage(){
+    let gameId = localStorage.getItem('gameId')
+    let playerId = localStorage.getItem('playerId')
+    this.props.onUpdateGameId(gameId)
+    this.props.onUpdatePlayerId(playerId)
+    axios.get(`/api/gamestate/${gameId}`)
+      .then(res => {
+        this.props.onUpdatePlayer(res.data.players)
+        this.props.onUpdateDeck(res.data.deck)
+        this.props.onUpdateFlop(res.data.flop)
+        this.props.onUpdateBet(res.data.bet)
+        this.props.onUpdateLastMove(res.data.lastMove)
+        this.props.onUpdatePot(res.data.pot)
+        this.setState({ loading: false })
+      })
   }
 
   updateDatabase() {
@@ -130,8 +163,6 @@ class Table extends Component {
         this.sendSocketIO('state_updated')
       })
       .catch(err => console.log(err))
-
-
   }
 
   createNewGame() {
@@ -360,6 +391,7 @@ class Table extends Component {
     </div>
   )
 
+  /* When both players call, show cards and determine winner */
   showCards () {
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
@@ -486,6 +518,7 @@ const mapActionsToProps = {
   onWonPot: wonPot,
   onResetFlop: resetFlop,
   onUpdateGameId: updateGameId,
+  onUpdatePlayerId: updatePlayerId
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Table)
