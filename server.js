@@ -24,7 +24,6 @@ io.on('connection', function(socket){
 
   socket.on('state_updated', function(){
     console.log('Game state updated');
-    //io.sockets.connected[socketId].emit('new_state-available')
     socket.broadcast.emit('new_state_available')
   });
 
@@ -55,7 +54,5 @@ mongoose
 
 // Use Routes
 app.use('/api/gamestate', gameState);
-
-//const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));

@@ -34,6 +34,7 @@ class Lobby extends Component {
       .catch(err => console.log(err));
   }
 
+  /* Determine whether to show main menu, lobby menu or name input box */
   toggleView = (showMenu, showInput, showGames) => {
     this.setState({
       showMainMenu: showMenu,
@@ -46,6 +47,7 @@ class Lobby extends Component {
     this.setState({name})
   }
 
+  /* After selecting new game or game from lobby enter name input */
   enterGame(gameId, playerId) {
     this.setState({ gameId })
     this.setState({ playerId })
@@ -92,7 +94,7 @@ class Lobby extends Component {
     )
   }
 
-
+  /* Create new player and update info in redux store */
   initiatePlayer(playerId, gameId) {
     this.props.onUpdateGameId(gameId)
     this.props.onUpdatePlayerId(playerId)
