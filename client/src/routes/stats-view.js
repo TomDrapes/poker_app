@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
-import RaisedButton from "material-ui/RaisedButton";
 import BarChart from '../components/charts/BarChart'
 import { range as d3Range } from "d3"
 import axios from 'axios'

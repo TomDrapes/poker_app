@@ -12,10 +12,7 @@ import { updateBet } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
 import { updateGameId, updatePlayerId } from '../../Actions/LocalStateActions'
-import { isFlush, isRoyalFlush, isStraightFlush,
-  isOfAKind, isFullHouse, isStraight, isTwoPair, determineBestHand} from './handAlgorithms'
-import uuid from 'uuid'
-
+import { determineBestHand} from './handAlgorithms'
 
 class Table extends Component {
   constructor (props) {
@@ -56,8 +53,12 @@ class Table extends Component {
     switch(msg) {
       case 'new_game':
         this.state.socket.emit('game_created')
+        break;
       case 'state_updated':
         this.state.socket.emit('state_updated')
+        break;
+      default:
+        console.log("Error: /Table.js sendSocketIO")
     }
   }
 

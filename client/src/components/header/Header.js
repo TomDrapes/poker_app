@@ -6,7 +6,6 @@ import './style.css'
 class Header extends Component {
 
   render () {
-    console.log(this.props.players)
     return (
       <div className="headerWrapper">
         <span>

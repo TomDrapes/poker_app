@@ -29,7 +29,7 @@ export default class BarChart extends Component {
   }
 
   render() {
-   const { x, y, data, height, highlightBar, highlightedBar } = this.props,
+   const { x, y, data, height } = this.props,
     { widthScale, heightScale } = this.state
 
     return (
