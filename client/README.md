@@ -6,24 +6,23 @@ by Tom Drapes
 ## About
 
 This app is based on classic Texas Hold'em Poker and is made for two players.
-Built with React/Redux.
+Built using the MERN stack this application also uses Redux, React-router, D3.js and socket.io
 
 ## What is completed.
-* Rough design and layout
+* Design and layout
 * Game state
 * Basic game flow
-* Initial chat
+* Chat
 * Algorithms to check player hands
+* MongoDB database integration
+* D3.js Statistics page (localhost:3000/stats)
 
 ## What still needs to be done
-* Style needs to be better developed eg. replace hardcoded styles with responsive designs
+* Replace hardcoded styles with responsive designs
 * Algorithm bug testing
-* Finalize game flow eg. Show hands => determine winner => distribute chips => reset state => reshuffle => deal
-* Client/Host networking
-* Back-end stuff eg. db's and d3.js integration
+* Handle end game when player runs out of chips ie => end game / reset game
+* Test for edge cases
 * Flow integration for stricter type specifications
-
-
 
 ## Current Problems
 * Flow integration. Not necessary but desirable.
@@ -41,5 +40,6 @@ $ use cosc360_tdrapes
 * In poker_app/client/index.js make sure that window.devToolsExtension && window.devToolsExtension() is commented out.
 * From inside poker_app directory run: npm run dev
 * Once game is open in browser either start new game, join existing game or view stats at localhost:3000/stats
+
 ## Attributes
 Vectors by <a href="https://www.Vecteezy.com">www.vecteezy.com</a>
