@@ -12,6 +12,7 @@ Built using the MERN stack this application also uses Redux, React-router, D3.js
 * Design and layout
 * Game state
 * Basic game flow
+* Server backend using Express.js and socket.io
 * Chat
 * Algorithms to check player hands
 * MongoDB database integration
