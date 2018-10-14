@@ -27,9 +27,9 @@ io.on('connection', function(socket){
     socket.broadcast.emit('new_state_available', lastMove)
   });
 
-  socket.on('game_created', function(){
+  socket.on('game_created', function(lastMove){
     console.log('Starting new game...')
-    io.sockets.emit('new_state_available')
+    io.sockets.emit('new_state_available', lastMove)
   })
 
   socket.on('new_message', function(){
