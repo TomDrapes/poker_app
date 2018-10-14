@@ -22,9 +22,9 @@ io.on('connection', function(socket){
     console.log('User disconnected');
   });
 
-  socket.on('state_updated', function(){
+  socket.on('state_updated', function(lastMove){
     console.log('Game state updated');
-    socket.broadcast.emit('new_state_available')
+    socket.broadcast.emit('new_state_available', lastMove)
   });
 
   socket.on('game_created', function(){

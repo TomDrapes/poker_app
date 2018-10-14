@@ -195,6 +195,7 @@ export function determineBestHand (hand, flop, deck) {
       deck[key-1]
     )
   })
+  console.log(playersHand)
 
   let f = flop.map(key => {
     return(

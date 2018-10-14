@@ -22,17 +22,19 @@ class Table extends Component {
       betAmount: this.props.currentBet,
       loading: true,
       socket: this.props.socket,
-      flop: 0
+      flop: 0,
+      lastMove: ''
     }
 
-    this.state.socket.on('new_state_available', () => {
+    this.state.socket.on('new_state_available', (opp_move) => {
       console.log("Updating state...\n");
-      this.receiveSocketIO();
+      this.receiveSocketIO(opp_move);
     })
   }
 
   /* Update state in redux when client receives signal that new state is available */
-  receiveSocketIO = () => {
+  receiveSocketIO = (opponents_move) => {
+
     axios.get(`/api/gamestate/${this.props.localState.gameId}`)
       .then(res => {
         this.props.onUpdateBet(res.data.bet)
@@ -41,7 +43,10 @@ class Table extends Component {
         this.props.onUpdateLastMove(res.data.lastMove)
         this.props.onUpdatePot(res.data.pot)
         this.props.onUpdateDeck(res.data.deck)
-        this.setState({ loading: false })
+        this.setState({
+          loading: false,
+          lastMove: opponents_move
+        })
       })
       .catch(err => {
         console.log(err)
@@ -55,7 +60,7 @@ class Table extends Component {
         this.state.socket.emit('game_created')
         break;
       case 'state_updated':
-        this.state.socket.emit('state_updated')
+        this.state.socket.emit('state_updated', this.props.lastMove)
         break;
       default:
         console.log("Error: /Table.js sendSocketIO")
@@ -292,6 +297,12 @@ class Table extends Component {
 
   /* Make check move and update state in store */
   check () {
+    let p1Hand = determineBestHand(
+      this.props.players[0].hand, this.props.flop, this.props.localState.deck
+    )
+    let p2Hand = determineBestHand(
+      this.props.players[1].hand, this.props.flop, this.props.localState.deck
+    )
     if (this.props.lastMove === 'checked') {
       this.flop()
       this.props.onUpdatePlayersTurn(this.props.players[1])
@@ -446,7 +457,10 @@ class Table extends Component {
           <div className="gameWindow">
 
             <div className='status'>
-            { this.props.players[this.props.localState.playerId-1].playersTurn && <div>Your turn</div> }
+            { this.props.players[this.props.localState.playerId-1].playersTurn &&
+              <div>
+                {this.props.players[this.opponent()].name + ' ' + this.state.lastMove}
+              </div> }
             { !this.props.players[this.props.localState.playerId-1].playersTurn && this.props.players[this.opponent()] && <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.players[this.opponent()].name}</div>}
             </div>
             <div className="pot">Pot: {this.props.pot}</div>
