@@ -1,15 +1,23 @@
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
 .chatWindow{
   width: 25vw;
   height: 90vh;
-  border: 1px solid rgb(0, 0, 0);
-  float: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
 }
 .messageWindow{
-  height: 90%;
+  flex-grow: 1;
   overflow-y: scroll;
 }
 .chatInputWrapper{
-  height: 4%;
+  align-items: flex-end;
   width: 100%;
   clear: both;
 }
