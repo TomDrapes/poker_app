@@ -1,6 +1,11 @@
 import React from 'react'
 import Card from './card'
 
+export function sum(a,b){
+  return a + b
+}
+//module.exports = sum;
+
 export function isFlush (hand) {
   let hearts = 0
   let diamonds = 0
