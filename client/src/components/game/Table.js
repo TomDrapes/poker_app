@@ -23,7 +23,7 @@ class Table extends Component {
       loading: true,
       socket: this.props.socket,
       flop: 0,
-      lastMove: ''
+      lastMove: `It's your turn`
     }
 
     this.state.socket.on('new_state_available', (opp_move) => {
@@ -57,10 +57,10 @@ class Table extends Component {
   sendSocketIO = (msg) => {
     switch(msg) {
       case 'new_game':
-        this.state.socket.emit('game_created')
+        this.state.socket.emit('game_created', this.state.lastMove)
         break;
       case 'state_updated':
-        this.state.socket.emit('state_updated', this.props.lastMove)
+        this.state.socket.emit('state_updated', this.state.lastMove)
         break;
       default:
         console.log("Error: /Table.js sendSocketIO")
@@ -297,6 +297,7 @@ class Table extends Component {
 
   /* Make check move and update state in store */
   check () {
+    this.updateLastMove(`${this.playersName()} checked`)
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
     )
@@ -348,6 +349,7 @@ class Table extends Component {
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdateBet(this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
+      this.updateLastMove(`${this.playersName()} bet ${this.state.betAmount}`)
       setTimeout(() => {
         this.updateDatabase()
       }, 2000)
@@ -358,6 +360,7 @@ class Table extends Component {
       this.props.onUpdateLastMove('called')
       this.props.onUpdateChipCount(player, this.props.currentBet)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
+      this.updateLastMove(`${this.playersName()} called ${this.state.betAmount}`)
       setTimeout(() => {
         this.updateDatabase()
       }, 2000)
@@ -368,6 +371,7 @@ class Table extends Component {
       this.props.onUpdateLastMove('raised')
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
+      this.updateLastMove(`${this.playersName()} raised the bet to ${this.state.betAmount}`)
       setTimeout(() => {
         this.updateDatabase()
       }, 2000)
@@ -392,6 +396,8 @@ class Table extends Component {
     this.props.onUpdatePot(0)
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
+    // Update local lastMove to send to opponent
+    this.updateLastMove(`${this.playersName()} folded`)
   }
 
   // Bet incrementor component
@@ -403,6 +409,9 @@ class Table extends Component {
     </div>
   )
 
+  updateLastMove(lastMove){
+    this.setState({ lastMove: '> ' + lastMove  })
+  }
   /* When both players call, show cards and determine winner */
   showCards () {
     let p1Hand = determineBestHand(
@@ -444,6 +453,10 @@ class Table extends Component {
     return 0
   }
 
+  playersName(){
+    return this.props.players[this.props.localState.playerId-1].name
+  }
+
   render () {
     return (
       <div className="table">
@@ -459,7 +472,7 @@ class Table extends Component {
             <div className='status'>
             { this.props.players[this.props.localState.playerId-1].playersTurn &&
               <div>
-                {this.props.players[this.opponent()].name + ' ' + this.state.lastMove}
+                {this.state.lastMove}
               </div> }
             { !this.props.players[this.props.localState.playerId-1].playersTurn && this.props.players[this.opponent()] && <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.players[this.opponent()].name}</div>}
             </div>

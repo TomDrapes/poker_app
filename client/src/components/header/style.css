@@ -1,8 +1,16 @@
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
 .headerWrapper {
   padding: 5px;
   font-size: 24px;
   background-image: linear-gradient(rgb(0,0,0), rgb(70, 70, 70), rgb(0, 0, 0));
   color: #fff;
+  width: 100vw;
+  height: 10vh;
 }
 .name{
   float: left;

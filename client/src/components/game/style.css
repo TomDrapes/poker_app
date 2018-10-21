@@ -1,11 +1,14 @@
 .table{
-  height: 100vh;
+  height: 90vh;
   width: 75vw;
   float: left;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 .gameWindow{
   width: 75vw;
-  height: 90vh;
+  height: 100%;
   background-image: radial-gradient(circle, rgb(5,110,27), rgb(2, 72, 17));
   float: left;
   padding-top:15px;
