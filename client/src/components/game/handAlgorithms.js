@@ -4,7 +4,7 @@ import Card from './card'
 export function sum(a,b){
   return a + b
 }
-//module.exports = sum;
+
 
 export function isFlush (hand) {
   let hearts = 0
@@ -14,26 +14,26 @@ export function isFlush (hand) {
 
   for (let i = 0; i < hand.length; i++) {
     switch (hand[i].suit) {
-      case 'HEART': hearts++
+      case 'HEARTS': hearts++
         break
-      case 'DIAMOND': diamonds++
+      case 'DIAMONDS': diamonds++
         break
-      case 'CLUB': clubs++
+      case 'CLUBS': clubs++
         break
-      case 'SPADE': spades++
+      case 'SPADES': spades++
         break
       default: break
     }
   }
 
   if (hearts >= 5) {
-    return 'HEART'
+    return 'HEARTS'
   } else if (diamonds >= 5) {
-    return 'DIAMOND'
+    return 'DIAMONDS'
   } else if (spades >= 5) {
-    return 'SPADE'
+    return 'SPADES'
   } else if (clubs >= 5) {
-    return 'CLUB'
+    return 'CLUBS'
   } else {
     return 'NO_FLUSH'
   }
