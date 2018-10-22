@@ -195,12 +195,13 @@ export function isTwoPair (h) {
    TODO: change this to return { type: string, value: number }
 */
 export function determineBestHand (hand, flop, deck) {
+ 
   const playersHand = hand.map(key => {
     return(
       deck[key-1]
     )
   })
-  console.log(playersHand)
+  
 
   let f = flop.map(key => {
     return(
@@ -301,17 +302,17 @@ export function determineBestHand (hand, flop, deck) {
   })
 
   switch(h[1].value){
-    case 14: return { type: 'Ace of' + h[1].suit, value: 13}
-    case 13: return { type: 'King of' + h[1].suit, value: 12}
-    case 12: return { type: 'Queen of' + h[1].suit, value: 11}
-    case 11: return { type: 'Jack of' + h[1].suit, value: 10}
-    case 10: return { type: 'Ten of' + h[1].suit, value: 9}
-    case 9: return { type: 'Nine of' + h[1].suit, value: 8}
-    case 8: return { type: 'Eight of' + h[1].suit, value: 7}
-    case 7: return { type: 'Seven of' + h[1].suit, value: 6}
-    case 6: return { type: 'Six of' + h[1].suit, value: 5}
-    case 5: return { type: 'Five of' + h[1].suit, value: 4}
-    case 4: return { type: 'Four of' + h[1].suit, value: 3}
+    case 14: return { type: 'Ace of ' + h[1].suit, value: 13}
+    case 13: return { type: 'King of ' + h[1].suit, value: 12}
+    case 12: return { type: 'Queen of ' + h[1].suit, value: 11}
+    case 11: return { type: 'Jack of ' + h[1].suit, value: 10}
+    case 10: return { type: 'Ten of ' + h[1].suit, value: 9}
+    case 9: return { type: 'Nine of ' + h[1].suit, value: 8}
+    case 8: return { type: 'Eight of ' + h[1].suit, value: 7}
+    case 7: return { type: 'Seven of ' + h[1].suit, value: 6}
+    case 6: return { type: 'Six of ' + h[1].suit, value: 5}
+    case 5: return { type: 'Five of ' + h[1].suit, value: 4}
+    case 4: return { type: 'Four of ' + h[1].suit, value: 3}
     case 3: return { type: 'Three of ' + h[1].suit, value: 2 }
     case 2: return { type: 'Two of ' + h[1].suit, value: 1 }
     default: return { type: 'ERROR', value: 0 }
