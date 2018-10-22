@@ -5,12 +5,16 @@
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  position: relative;
+  background-image: radial-gradient(circle, rgb(5,110,27), rgb(2, 72, 17));
 }
 .gameWindow{
   width: 75vw;
   height: 100%;
-  background-image: radial-gradient(circle, rgb(5,110,27), rgb(2, 72, 17));
-  float: left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   padding-top:15px;
 }
 
@@ -25,7 +29,7 @@
 }
 
 .oppSide {
-  float: right;
+  align-self: flex-end;
 }
 
 .oppName{
@@ -44,15 +48,19 @@
   margin-left: 80px;
 }
 
-.playerName {
+.chipCount {
   float: left;
   font-size: 24px;
   margin-bottom: 20px;
   color: white;
 }
 
-.playerSide {
-  clear: left;
+.playerSide {  
+  float: left;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  
 }
 
 .clear{
@@ -144,7 +152,7 @@
   border-bottom-right-radius: 5px;
 }
 
-.statusMsg{
+.playerName{
   float: left;
   margin-bottom: 10px;
   margin-top: 30px;
@@ -178,9 +186,38 @@
 .pot {
   color: white;
   margin-left: 10px;
+  align-self: flex-start;
 }
 
 .status {
   color: white;
   margin-left: 10px;
+  align-self: flex-start;
+}
+
+.overlay-container {
+  z-index: 2;
+  padding: 10px;
+  width: 600px;
+  height: 300px;
+  background-color: rgba(0,0,0,0.8);
+  border: 2px solid white;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -300px;
+  margin-top: -150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-direction: column;
+}
+
+.winner {
+  font-size: 56px;
+  font-weight: bold;
 }

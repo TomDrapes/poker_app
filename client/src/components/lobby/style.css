@@ -9,6 +9,8 @@
   text-align: center;
   margin: 0 auto;
   width: auto;
+  height: 50%;
+  overflow-y: scroll;
 
 }
 
