@@ -4,7 +4,7 @@ export default class Overlay extends Component {
 
     render(){
         return (
-            <div>
+            <div onClick={this.props.nextRound}>
                 {this.props.showOverlay && 
                     <div className="overlay-container">
                         <div className="p1-hand">{this.props.msg.p1}</div><br/>

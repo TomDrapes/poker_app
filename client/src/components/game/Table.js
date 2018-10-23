@@ -37,7 +37,7 @@ class Table extends Component {
 
   /* Update state in redux when client receives signal that new state is available */
   receiveSocketIO = (opponents_move) => {
-
+    console.log('receiving on socket')
     axios.get(`/api/gamestate/${this.props.localState.gameId}`)
       .then(res => {
         this.props.onUpdateBet(res.data.bet)
@@ -58,6 +58,7 @@ class Table extends Component {
 
   /* Get server to broadcast to opponent that either a game is created or state has been updated */
   sendSocketIO = (msg) => {
+    console.log('sending on socket')
     switch(msg) {
       case 'new_game':
         this.state.socket.emit('game_created', this.state.lastMove)
@@ -120,22 +121,31 @@ class Table extends Component {
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate (prevProps, prevState) {
     
-    if (this.state.lastMove === 'show cards' && prevState.lastMove !== 'show cards') {
-      this.setState({ showHand: true })
-    }
-    
-    if ((this.props.lastMove === 'both_checked' && this.state.flop === 6) ||
+    if ((this.props.lastMove === 'both_checked' && this.state.flop === 6 
+    && prevProps.lastMove !== 'show_cards' && prevProps.lastMove !== 'both_checked') ||
       (this.props.lastMove === 'called' && this.state.flop === 5)) {
+      console.log('update DB 1')
       this.updateDatabase()
+      this.setState({ showHand: true })
       this.showCards(prevState)
     } else if (this.props.lastMove === 'called') {
       this.flop()
-    } else if (this.props.lastMove === 'folded' || this.props.lastMove === 'round_completed') {
+    } else if (this.props.lastMove === 'folded' /*|| this.props.lastMove === 'round_completed'*/) {
       this.shuffle(this.props.deck)
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
+    }else if (this.props.lastMove === 'round_completed'){
+      console.log('stopped here')
+      if(this.props.players[this.props.localState.playerId-1].playersTurn){
+        this.shuffle(this.props.deck)
+      }
+    }else if(this.props.lastMove === 'dealt' && prevProps.lastMove !== 'dealt'){
+      this.setState({
+        flop: 0,
+        showHand: false,
+        lastMove: ''
+      })
     }
-    
   }
 
   saveStateLocally(){
@@ -162,6 +172,7 @@ class Table extends Component {
   }
 
   updateDatabase() {
+    console.log('updating DB...')
     let gameState = {
       _id: this.props.localState.gameId,
       players: this.props.players,
@@ -212,6 +223,7 @@ class Table extends Component {
     this.props.onUpdateLastMove('dealt')
     this.setState({ flop: 0 })
     setTimeout(() => {
+      console.log('update DB 2')
       this.updateDatabase()
     },2000)
   }
@@ -237,7 +249,9 @@ class Table extends Component {
   /* Flop top card off the deck and then update state in store */
   flop () {
     this.setState({ flop: this.state.flop + 1 })
+    console.log('outside flop')
     if(this.state.flop < 5){
+      console.log('inside flop')
       let flop = this.props.flop
       let deck = this.props.deck
       flop.push(deck[0])
@@ -246,8 +260,9 @@ class Table extends Component {
       this.props.onUpdateFlop(flop)
       this.props.onUpdateLastMove('flopped')
       setTimeout(() => {
+        console.log('update DB 3')
         this.updateDatabase()
-      },2000)
+      },3000)
     }
   }
 
@@ -311,25 +326,21 @@ class Table extends Component {
   /* Make check move and update state in store */
   check () {
     this.updateLastMove(`${this.playersName()} checked`)
-    let p1Hand = determineBestHand(
-      this.props.players[0].hand, this.props.flop, this.props.localState.deck
-    )
-    let p2Hand = determineBestHand(
-      this.props.players[1].hand, this.props.flop, this.props.localState.deck
-    )
     if (this.props.lastMove === 'checked') {
-      this.flop()
       this.props.onUpdatePlayersTurn(this.props.players[1])
       this.props.onUpdatePlayersTurn(this.props.players[0])
       this.props.onUpdateLastMove('both_checked')
+      this.flop()
     } else {
+      //if(this.state.flop === 6) { this.flop() }
+      this.setState({ flop: this.state.flop + 1 })
       this.props.onUpdateLastMove('checked')
       this.props.onUpdatePlayersTurn(this.props.players[1])
       this.props.onUpdatePlayersTurn(this.props.players[0])
+      setTimeout(() => {
+        this.updateDatabase()
+      },2000)
     }
-    setTimeout(() => {
-      this.updateDatabase()
-    },2000)
   }
 
   /* Increment bet amount and update local state */
@@ -364,6 +375,7 @@ class Table extends Component {
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} bet ${this.state.betAmount}`)
       setTimeout(() => {
+        console.log('update DB 4')
         this.updateDatabase()
       }, 2000)
 
@@ -375,6 +387,7 @@ class Table extends Component {
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} called ${this.state.betAmount}`)
       setTimeout(() => {
+        console.log('update DB 5')
         this.updateDatabase()
       }, 2000)
 
@@ -386,6 +399,7 @@ class Table extends Component {
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} raised the bet to ${this.state.betAmount}`)
       setTimeout(() => {
+        console.log('update DB 6')
         this.updateDatabase()
       }, 2000)
     }
@@ -435,48 +449,45 @@ class Table extends Component {
     let p2Hand = determineBestHand(
       this.props.players[1].hand, this.props.flop, this.props.localState.deck
     )
-    
-   // let bothHands = this.props.players[0].name +' has ' + p1Hand.type + '<br/>' + 
-     // this.props.players[1].name + ' had ' + p2Hand.type + '\n'
 
-    if(prevState.lastMove !== 'show cards'){
-      
-      let winner = ''
-      if(p1Hand.value > p2Hand.value){
-        winner = this.props.players[0].name + ' wins the pot\n'
-        this.props.onWonPot(this.props.players[0], this.props.pot)
-      }else if(p2Hand.value > p1Hand.value){
-        winner = this.props.players[1].name + ' wins the pot\n'
-        this.props.onWonPot(this.props.players[1], this.props.pot)
-      }else{
-        winner = 'Draw'
-        this.props.onWonPot(this.props.players[0], this.props.pot/2)
-        this.props.onWonPot(this.props.players[1], this.props.pot/2)
-      }
-
-      let status = { 
-        p1: this.props.players[0].name +' has ' + p1Hand.type,
-        p2: this.props.players[1].name + ' had ' + p2Hand.type,
-        winner: winner
-      }
-
-      this.setState({
-        lastMove:  'show cards',
-        status: status
-      })
+    let winner = ''
+    if(p1Hand.value > p2Hand.value){
+      winner = this.props.players[0].name + ' wins the pot\n'
+      this.props.onWonPot(this.props.players[0], this.props.pot)
+    }else if(p2Hand.value > p1Hand.value){
+      winner = this.props.players[1].name + ' wins the pot\n'
+      this.props.onWonPot(this.props.players[1], this.props.pot)
+    }else{
+      winner = 'Draw'
+      this.props.onWonPot(this.props.players[0], this.props.pot/2)
+      this.props.onWonPot(this.props.players[1], this.props.pot/2)
     }
 
+    let status = { 
+      p1: this.props.players[0].name +' has ' + p1Hand.type,
+      p2: this.props.players[1].name + ' had ' + p2Hand.type,
+      winner: winner
+    }
 
-    /*setTimeout(() => {
-      // Revert bet amount back to start state locally and in store 
-      this.props.onUpdateBet(10)
-      this.setState({ betAmount: 10 })
-      // Update state in store
-      this.props.onUpdateLastMove('round_completed')
-      this.props.onUpdatePot(0)
-      this.props.onUpdatePlayersTurn(this.props.players[1])
-      this.props.onUpdatePlayersTurn(this.props.players[0])
-    }, 10000)*/
+    this.setState({
+      status: status,                
+    })
+
+    this.props.onUpdateLastMove('show_cards')
+  }
+
+  nextRound () {
+    this.props.onUpdateLastMove('round_completed')
+    this.props.onUpdateBet(10)
+    this.props.onUpdatePot(0)
+    this.props.onUpdatePlayersTurn(this.props.players[1])
+    this.props.onUpdatePlayersTurn(this.props.players[0])
+
+    this.setState({ 
+      showHand: false,
+      flop: 0,
+      lastMove: ''
+    })    
   }
 
   opponent(){
@@ -548,7 +559,7 @@ class Table extends Component {
               <div className="clear" />
             </div>
 
-            <Overlay msg={this.state.status} showOverlay={this.state.showHand}/>
+            <Overlay msg={this.state.status} showOverlay={this.state.showHand} nextRound={() => this.nextRound()}/>
           </div>
         }
       </div>

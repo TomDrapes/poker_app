@@ -45,6 +45,7 @@
 .flopWrapper{
   clear: both;
   text-align: center;
+  align-self: flex-start;
   margin-left: 80px;
 }
 
@@ -58,6 +59,7 @@
 .playerSide {  
   float: left;
   align-self: flex-start;
+  justify-self: flex-end;
   display: flex;
   align-items: center;
   
