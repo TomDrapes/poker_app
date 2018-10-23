@@ -9,7 +9,7 @@ class Header extends Component {
     return (
       <div className="headerWrapper">
         <span>
-          <img src={require('../../images/Poker-logo-white.png')} height='80' alt="logo" />
+          <img src={require('../../images/Poker-logo-white.png')} height='100%' alt="logo" />
           {this.props.players[0] && <Connection name={this.props.players[0].name} />}
           {this.props.players[1] && <Connection name={this.props.players[1].name} />}
         </span>

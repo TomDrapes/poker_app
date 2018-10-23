@@ -120,22 +120,21 @@ class Table extends Component {
 
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate (prevProps, prevState) {
-    
-    if ((this.props.lastMove === 'both_checked' && this.state.flop === 6 
-    && prevProps.lastMove !== 'show_cards' && prevProps.lastMove !== 'both_checked') ||
-      (this.props.lastMove === 'called' && this.state.flop === 5)) {
-      console.log('update DB 1')
-      this.updateDatabase()
-      this.setState({ showHand: true })
+
+    if ((this.props.lastMove === 'both_checked'
+      && this.state.flop === 6
+      && prevProps.lastMove !== 'show_cards'
+      && prevProps.lastMove !== 'both_checked')
+      || (this.props.lastMove === 'called'
+      && this.state.flop === 5)) {
       this.showCards(prevState)
     } else if (this.props.lastMove === 'called') {
       this.flop()
-    } else if (this.props.lastMove === 'folded' /*|| this.props.lastMove === 'round_completed'*/) {
+    } else if (this.props.lastMove === 'folded') {
       this.shuffle(this.props.deck)
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
     }else if (this.props.lastMove === 'round_completed'){
-      console.log('stopped here')
       if(this.props.players[this.props.localState.playerId-1].playersTurn){
         this.shuffle(this.props.deck)
       }
@@ -443,6 +442,9 @@ class Table extends Component {
   /* When both players call, show cards and determine winner */
   showCards (prevState) {
 
+    console.log('update DB 1')
+    this.updateDatabase()
+
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
     )
@@ -463,14 +465,15 @@ class Table extends Component {
       this.props.onWonPot(this.props.players[1], this.props.pot/2)
     }
 
-    let status = { 
+    let status = {
       p1: this.props.players[0].name +' has ' + p1Hand.type,
       p2: this.props.players[1].name + ' had ' + p2Hand.type,
       winner: winner
     }
 
     this.setState({
-      status: status,                
+      status: status,
+      showHand: true
     })
 
     this.props.onUpdateLastMove('show_cards')
@@ -483,11 +486,11 @@ class Table extends Component {
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
 
-    this.setState({ 
+    this.setState({
       showHand: false,
       flop: 0,
       lastMove: ''
-    })    
+    })
   }
 
   opponent(){
@@ -543,7 +546,7 @@ class Table extends Component {
             <div className="playerSide">
               {this.props.players[this.props.localState.playerId-1] &&
                  this.playersHand(this.props.players[this.props.localState.playerId-1])}
-              
+
               <div className="btnWrapper">
                 <div className="playerName">{this.props.players[this.props.localState.playerId-1].name}</div>
                 <div className="clear" />
