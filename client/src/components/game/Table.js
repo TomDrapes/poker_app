@@ -6,6 +6,7 @@ import Card from './card'
 import Spinner from './spinner'
 import Overlay from './overlay'
 import Opponent from './opponent'
+import Player from './player'
 import Flop from './flop'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
@@ -267,15 +268,7 @@ class Table extends Component {
     }
   }
 
-  /* Returns array of the players cards to be displayed */
-  playersHand (player) {
-    if(player){
-      if (player.hand.length === 2) {
-        return player.hand.map(key => this.props.localState.deck[key-1].card)
-      }
-    }
-    return null
-  }
+
 
   opponentsHand () {
     if (this.state.showHand){
@@ -288,41 +281,7 @@ class Table extends Component {
     }
   }
 
-  /* JSX to enable players buttons if it's their turn */
-  playerButtons (player, betAmount) {
-    if(player){
-      if (player.playersTurn) {
-        return (
-          <div>
-            {this.checkButton()}
-            <button className="foldBtn" onClick ={() => this.fold(player)}>FOLD</button>
-            <button type="button" className="betBtn" onClick={() => this.bet(player)}>BET</button>
-            {this.betIncrementor(player, betAmount)}
-          </div>
-        )
-      }
-    }
-    return (
-      <div>
-        <button className="checkBtn" disabled>CHECK</button>
-        <button className="foldBtn" disabled>FOLD</button>
-        <button type="button" className="betBtn" disabled>BET</button>
-        <div className="betAmountWaiting">{this.props.currentBet}</div>
-      </div>
-    )
-  }
 
-  /* Only enable check button if opponents move wasn't bet/raised */
-  checkButton = () => {
-    if (this.props.lastMove !== 'bet' && this.props.lastMove !== 'raised') {
-      return (
-        <button className="checkBtn" onClick={() => this.check()}>CHECK</button>
-      )
-    }
-    return (
-      <button className="checkBtn" disabled>CHECK</button>
-    )
-  }
 
   /* Make check move and update state in store */
   check () {
@@ -428,14 +387,7 @@ class Table extends Component {
     this.updateLastMove(`${this.playersName()} folded`)
   }
 
-  // Bet incrementor component
-  betIncrementor = (player, betAmount) => (
-    <div className="betAmount">
-      <i className="fa fa-caret-up" onClick={() => this.increaseBet(player)} />
-      <div>{betAmount}</div>
-      <i className="fa fa-caret-down" onClick={() => this.decreaseBet()} />
-    </div>
-  )
+
 
   updateLastMove(lastMove){
     this.setState({ lastMove: '> ' + lastMove  })
@@ -530,24 +482,19 @@ class Table extends Component {
 
             <Flop flop={this.props.flop.map(key => this.props.localState.deck[key-1].card)} />
 
-            <div className="playerSide">
-              {this.props.players[this.props.localState.playerId-1] &&
-                 this.playersHand(this.props.players[this.props.localState.playerId-1])}
+            <Player
+              player={this.props.players[this.props.localState.playerId-1]}
+              deck={this.props.localState.deck}
+              betAmount={this.state.betAmount}
+              currentBet={this.props.currentBet}
+              lastMove={this.props.lastMove}
+              fold={(player) => this.fold(player)}
+              bet={(player) => this.bet(player)}
+              increaseBet={(player) => this.increaseBet(player)}
+              decreaseBet={() => this.decreaseBet()}
+              check={() => this.check()}
+            />
 
-              <div className="btnWrapper">
-                <div className="playerName">{this.props.players[this.props.localState.playerId-1].name}</div>
-                <div className="clear" />
-                <div className="chipCount">
-                  <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip"/>
-                  {this.props.players[this.props.localState.playerId-1] &&
-                    this.props.players[this.props.localState.playerId-1].chipCount}
-                </div>
-                <div className="clear" />
-                {this.props.players[0] &&
-                  this.playerButtons(this.props.players[this.props.localState.playerId-1], this.state.betAmount)}
-              </div>
-              <div className="clear" />
-            </div>
 
             <Overlay msg={this.state.status} showOverlay={this.state.showHand} nextRound={() => this.nextRound()}/>
           </div>
