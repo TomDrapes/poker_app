@@ -6,6 +6,7 @@ import Card from './card'
 import Spinner from './spinner'
 import Overlay from './overlay'
 import Opponent from './opponent'
+import Flop from './flop'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
@@ -527,13 +528,7 @@ class Table extends Component {
             <div className="pot">Pot: {this.props.pot}</div>
             <Opponent player={this.props.players[this.opponent()]} hand={this.opponentsHand()} />
 
-            <div className="flopWrapper">
-              <div className="flop">
-                <Deck />
-                {this.props.flop.map(key => this.props.localState.deck[key-1].card)}
-                <div className="clear" />
-              </div>
-            </div>
+            <Flop flop={this.props.flop.map(key => this.props.localState.deck[key-1].card)} />
 
             <div className="playerSide">
               {this.props.players[this.props.localState.playerId-1] &&
