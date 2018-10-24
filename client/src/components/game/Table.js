@@ -5,6 +5,7 @@ import axios from 'axios'
 import Card from './card'
 import Spinner from './spinner'
 import Overlay from './overlay'
+import Opponent from './opponent'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
@@ -524,17 +525,8 @@ class Table extends Component {
             { !this.props.players[this.props.localState.playerId-1].playersTurn && this.props.players[this.opponent()] && <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.players[this.opponent()].name}</div>}
             </div>
             <div className="pot">Pot: {this.props.pot}</div>
-            <div className="oppSide">
-              <div className="oppName">
-                <div>
-                  {this.props.players[this.opponent()] && this.props.players[this.opponent()].name}
-                </div>
-                <img className='pokerChip' src={require('../../images/poker_chip.png')} height='50' width='50' alt="poker chip" />
-                {this.props.players[this.opponent()] && this.props.players[this.opponent()].chipCount }
-              </div>
-              {this.props.players[this.opponent()] && this.opponentsHand()}
-              <div className="clear" />
-            </div>
+            <Opponent player={this.props.players[this.opponent()]} hand={this.opponentsHand()} />
+
             <div className="flopWrapper">
               <div className="flop">
                 <Deck />
