@@ -268,21 +268,6 @@ class Table extends Component {
     }
   }
 
-
-
-  opponentsHand () {
-    if (this.state.showHand){
-      return this.props.players[this.opponent()].hand.map(key => this.props.localState.deck[key-1].card)
-    }else{
-      return ([
-          <Card image={require('../../images/cards/back.png')} key={0}/>,
-          <Card image={require('../../images/cards/back.png')} key={1}/>,
-        ])
-    }
-  }
-
-
-
   /* Make check move and update state in store */
   check () {
     this.updateLastMove(`${this.playersName()} checked`)
@@ -478,7 +463,12 @@ class Table extends Component {
             { !this.props.players[this.props.localState.playerId-1].playersTurn && this.props.players[this.opponent()] && <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.players[this.opponent()].name}</div>}
             </div>
             <div className="pot">Pot: {this.props.pot}</div>
-            <Opponent player={this.props.players[this.opponent()]} hand={this.opponentsHand()} />
+
+            <Opponent
+              player={this.props.players[this.opponent()]}
+              showHand={this.state.showHand}
+              deck={this.props.localState.deck}
+            />
 
             <Flop flop={this.props.flop.map(key => this.props.localState.deck[key-1].card)} />
 

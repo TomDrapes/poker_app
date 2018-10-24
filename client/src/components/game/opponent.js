@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Card from './card'
 
 export default class Opponent extends Component {
 
@@ -15,9 +16,16 @@ export default class Opponent extends Component {
     }
   }
 
-hand = () => {
+  hand = () => {
     if (this.props.player) {
-      return this.props.hand
+      if (this.props.showHand){
+        return this.props.player.hand.map(key => this.props.deck[key-1].card)
+      }else{
+        return ([
+            <Card image={require('../../images/cards/back.png')} key={0}/>,
+            <Card image={require('../../images/cards/back.png')} key={1}/>,
+          ])
+      }
     }
   }
 
