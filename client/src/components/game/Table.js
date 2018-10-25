@@ -8,6 +8,7 @@ import Overlay from './overlay'
 import Opponent from './opponent'
 import Player from './player'
 import Flop from './flop'
+import StatusMessage from './statusMessage'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
@@ -372,8 +373,6 @@ class Table extends Component {
     this.updateLastMove(`${this.playersName()} folded`)
   }
 
-
-
   updateLastMove(lastMove){
     this.setState({ lastMove: '> ' + lastMove  })
   }
@@ -455,13 +454,11 @@ class Table extends Component {
         { !this.state.loading &&
           <div className="gameWindow">
 
-            <div className='status'>
-            { this.props.players[this.props.localState.playerId-1].playersTurn &&
-              <div>
-                Your turn.
-              </div> }
-            { !this.props.players[this.props.localState.playerId-1].playersTurn && this.props.players[this.opponent()] && <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.players[this.opponent()].name}</div>}
-            </div>
+            <StatusMessage
+              player={this.props.players[this.props.localState.playerId-1]}
+              opponent={this.props.players[this.opponent()]}
+            />
+
             <div className="pot">Pot: {this.props.pot}</div>
 
             <Opponent
@@ -485,8 +482,11 @@ class Table extends Component {
               check={() => this.check()}
             />
 
-
-            <Overlay msg={this.state.status} showOverlay={this.state.showHand} nextRound={() => this.nextRound()}/>
+            <Overlay
+              msg={this.state.status}
+              showOverlay={this.state.showHand}
+              nextRound={() => this.nextRound()}
+            />
           </div>
         }
       </div>
