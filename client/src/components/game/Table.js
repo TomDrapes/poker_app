@@ -1,8 +1,6 @@
 
 import React, { Component } from 'react'
-import Deck from './deck'
 import axios from 'axios'
-import Card from './card'
 import Spinner from './spinner'
 import Overlay from './overlay'
 import Opponent from './opponent'
