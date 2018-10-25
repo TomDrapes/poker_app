@@ -56,13 +56,13 @@
   color: white;
 }
 
-.playerSide {  
+.playerSide {
   float: left;
   align-self: flex-start;
   justify-self: flex-end;
   display: flex;
   align-items: center;
-  
+
 }
 
 .clear{
@@ -175,7 +175,6 @@
   margin: 0 auto;
   width: auto;
   font-size: 86px;
-  margin-top: 15%;
   color: white;
   text-align: center;
 }
