@@ -14,7 +14,7 @@ import { updatePlayer, updatePlayersTurn, updateChipCount, wonPot } from '../../
 import { updateBet } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
-import { updateGameId, updatePlayerId } from '../../Actions/LocalStateActions'
+import { updateGameId, updatePlayerId, updateDB } from '../../Actions/LocalStateActions'
 import { determineBestHand} from './handAlgorithms'
 
 class Table extends Component {
@@ -74,8 +74,12 @@ class Table extends Component {
   }
 
   /* Update current bet amount in local state if opponent raises */
-  componentWillReceiveProps(){
+  componentWillReceiveProps(nextProps){
     this.setState({ betAmount: this.props.currentBet })
+    if(nextProps.localState.updateDB){
+      this.updateDatabase(nextProps)
+      this.props.onUpdateDB(false)
+    }
   }
 
   /* When component mounts there are 3 cases:
@@ -167,17 +171,17 @@ class Table extends Component {
       })
   }
 
-  updateDatabase() {
+  updateDatabase(nextProps) {
     console.log('updating DB...')
     let gameState = {
-      _id: this.props.localState.gameId,
-      players: this.props.players,
-      bet: this.props.currentBet,
-      pot: this.props.pot,
-      flop: this.props.flop,
-      deck: this.props.deck,
-      lastMove: this.props.lastMove,
-      messages: this.props.messages
+      _id: nextProps.localState.gameId,
+      players: nextProps.players,
+      bet: nextProps.currentBet,
+      pot:nextProps.pot,
+      flop: nextProps.flop,
+      deck: nextProps.deck,
+      lastMove: nextProps.lastMove,
+      messages: nextProps.messages
     }
     axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
       .then(res => {
@@ -218,10 +222,7 @@ class Table extends Component {
     this.props.onUpdatePlayer(p)
     this.props.onUpdateLastMove('dealt')
     this.setState({ flop: 0 })
-    setTimeout(() => {
-      console.log('update DB 2')
-      this.updateDatabase()
-    },2000)
+    this.props.onUpdateDB(true)
   }
 
   shuffle (deck) {
@@ -245,9 +246,7 @@ class Table extends Component {
   /* Flop top card off the deck and then update state in store */
   flop () {
     this.setState({ flop: this.state.flop + 1 })
-    console.log('outside flop')
     if(this.state.flop < 5){
-      console.log('inside flop')
       let flop = this.props.flop
       let deck = this.props.deck
       flop.push(deck[0])
@@ -255,10 +254,7 @@ class Table extends Component {
       this.props.onUpdateDeck(deck)
       this.props.onUpdateFlop(flop)
       this.props.onUpdateLastMove('flopped')
-      setTimeout(() => {
-        console.log('update DB 3')
-        this.updateDatabase()
-      },3000)
+      this.props.onUpdateDB(true)
     }
   }
 
@@ -271,14 +267,11 @@ class Table extends Component {
       this.props.onUpdateLastMove('both_checked')
       this.flop()
     } else {
-      //if(this.state.flop === 6) { this.flop() }
       this.setState({ flop: this.state.flop + 1 })
       this.props.onUpdateLastMove('checked')
       this.props.onUpdatePlayersTurn(this.props.players[1])
       this.props.onUpdatePlayersTurn(this.props.players[0])
-      setTimeout(() => {
-        this.updateDatabase()
-      },2000)
+      this.props.onUpdateDB(true)
     }
   }
 
@@ -313,10 +306,7 @@ class Table extends Component {
       this.props.onUpdateBet(this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} bet ${this.state.betAmount}`)
-      setTimeout(() => {
-        console.log('update DB 4')
-        this.updateDatabase()
-      }, 2000)
+      this.props.onUpdateDB(true)
 
     // Last Move was a bet/raise and player calling
     } else if ((this.state.betAmount === this.props.currentBet && this.props.lastMove === 'bet') ||
@@ -325,10 +315,7 @@ class Table extends Component {
       this.props.onUpdateChipCount(player, this.props.currentBet)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} called ${this.state.betAmount}`)
-      setTimeout(() => {
-        console.log('update DB 5')
-        this.updateDatabase()
-      }, 2000)
+      this.props.onUpdateDB(true)
 
     // Last move was a bet and player is raising
     } else if (this.props.lastMove === 'bet' && this.state.betAmount > this.props.currentBet) {
@@ -337,10 +324,7 @@ class Table extends Component {
       this.props.onUpdateChipCount(player, this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} raised the bet to ${this.state.betAmount}`)
-      setTimeout(() => {
-        console.log('update DB 6')
-        this.updateDatabase()
-      }, 2000)
+      this.props.onUpdateDB(true)
     }
   }
 
@@ -384,10 +368,9 @@ class Table extends Component {
   }
 
   /* When both players call, show cards and determine winner */
-  showCards (prevState) {
+  showCards () {
 
-    console.log('update DB 1')
-    this.updateDatabase()
+    this.updateDatabase(this.props)    
 
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
@@ -527,7 +510,8 @@ const mapActionsToProps = {
   onWonPot: wonPot,
   onResetFlop: resetFlop,
   onUpdateGameId: updateGameId,
-  onUpdatePlayerId: updatePlayerId
+  onUpdatePlayerId: updatePlayerId,
+  onUpdateDB: updateDB
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Table)

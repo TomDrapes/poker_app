@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { updatePlayer } from '../../Actions/PlayersActions'
-import { updateGameId, updatePlayerId } from '../../Actions/LocalStateActions'
+import { updateGameId, updatePlayerId, updateDB } from '../../Actions/LocalStateActions'
 import uuid from 'uuid'
 import axios from 'axios'
 import './style.css'
@@ -98,6 +98,7 @@ class Lobby extends Component {
   initiatePlayer(playerId, gameId) {
     this.props.onUpdateGameId(gameId)
     this.props.onUpdatePlayerId(playerId)
+    this.props.onUpdateDB(false)
     let playersTurn = false
     if(playerId === 2){
       playersTurn = true
@@ -149,7 +150,8 @@ const mapStateToProps = (state) => {
 const mapActionsToProps = {
   onUpdatePlayer: updatePlayer,
   onUpdateGameId: updateGameId,
-  onUpdatePlayerId: updatePlayerId
+  onUpdatePlayerId: updatePlayerId,
+  onUpdateDB: updateDB
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Lobby)

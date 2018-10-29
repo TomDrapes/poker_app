@@ -1,6 +1,7 @@
 export const UPDATE_GAME_ID = 'updateGameId'
 export const UPDATE_PLAYER_ID = 'updatePlayerId'
 export const UPDATE_DECK = 'localState:updateDeck'
+export const UPDATE_DATABASE = 'localState:updateDatabase'
 
 export function updateGameId (id) {
   return {
@@ -29,4 +30,12 @@ export function updateDeck (newDeck) {
   }
 }
 
+export function updateDB (bool) {
+  return {
+    type: UPDATE_DATABASE,
+    payload: {
+      updateDB: bool
+    }
+  }
+}
 
