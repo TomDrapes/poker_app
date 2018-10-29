@@ -123,12 +123,7 @@ class Table extends Component {
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate (prevProps, prevState) {
 
-    if ((this.props.lastMove === 'both_checked'
-      && this.state.flop === 6
-      && prevProps.lastMove !== 'show_cards'
-      && prevProps.lastMove !== 'both_checked')
-      || (this.props.lastMove === 'called'
-      && this.state.flop === 5)) {
+    if (this.timeToShowCards(prevProps)) {
       this.showCards(prevState)
     } else if (this.props.lastMove === 'called') {
       this.flop()
@@ -373,6 +368,19 @@ class Table extends Component {
 
   updateLastMove(lastMove){
     this.setState({ lastMove: '> ' + lastMove  })
+  }
+
+  // Conditions for when to show cards
+  timeToShowCards(prevProps) {
+    return (
+      (this.props.lastMove === 'both_checked'
+      && this.state.flop === 6
+      && prevProps.lastMove !== 'show_cards'
+      && prevProps.lastMove !== 'both_checked')
+      || 
+      (this.props.lastMove === 'called'
+      && this.state.flop === 5)
+    )    
   }
 
   /* When both players call, show cards and determine winner */
