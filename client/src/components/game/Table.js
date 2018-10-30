@@ -10,7 +10,7 @@ import StatusMessage from './statusMessage'
 import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
-import { updatePlayer, updatePlayersTurn, updateChipCount, wonPot } from '../../Actions/PlayersActions'
+import { updatePlayer, updatePlayersTurn, decreaseChipCount, increaseChipCount, updateBetAmountSoFar } from '../../Actions/PlayersActions'
 import { updateBet } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
@@ -302,7 +302,7 @@ class Table extends Component {
     if (this.props.lastMove !== 'called' && this.props.lastMove !== 'raised' &&
       this.props.lastMove !== 'bet') {
       this.props.onUpdateLastMove('bet')
-      this.props.onUpdateChipCount(player, this.state.betAmount)
+      this.props.onDecreaseChipCount(player, this.state.betAmount)
       this.props.onUpdateBet(this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} bet ${this.state.betAmount}`)
@@ -312,7 +312,7 @@ class Table extends Component {
     } else if ((this.state.betAmount === this.props.currentBet && this.props.lastMove === 'bet') ||
     (this.state.betAmount === this.props.currentBet && this.props.lastMove === 'raised')) {
       this.props.onUpdateLastMove('called')
-      this.props.onUpdateChipCount(player, this.props.currentBet)
+      this.props.onDecreaseChipCount(player, this.props.currentBet)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} called ${this.state.betAmount}`)
       this.props.onUpdateDB(true)
@@ -321,7 +321,7 @@ class Table extends Component {
     } else if (this.props.lastMove === 'bet' && this.state.betAmount > this.props.currentBet) {
       this.props.onUpdateBet(this.state.betAmount)
       this.props.onUpdateLastMove('raised')
-      this.props.onUpdateChipCount(player, this.state.betAmount)
+      this.props.onDecreaseChipCount(player, this.state.betAmount)
       this.props.onUpdatePot(this.props.pot + this.state.betAmount)
       this.updateLastMove(`${this.playersName()} raised the bet to ${this.state.betAmount}`)
       this.props.onUpdateDB(true)
@@ -333,7 +333,7 @@ class Table extends Component {
     for (let i = 0; i < this.props.players.length; i++) {
       // Opponent wins the pot
       if (this.props.players[i].name !== player.name) {
-        this.props.onWonPot(this.props.players[i], this.props.pot)
+        this.props.onIncreaseChipCount(this.props.players[i], this.props.pot)
       }
     }
     // Revert bet amount back to start state locally and in store */
@@ -361,16 +361,16 @@ class Table extends Component {
       && this.state.flop === 6
       && prevProps.lastMove !== 'show_cards'
       && prevProps.lastMove !== 'both_checked')
-      || 
+      ||
       (this.props.lastMove === 'called'
       && this.state.flop === 5)
-    )    
+    )
   }
 
   /* When both players call, show cards and determine winner */
   showCards () {
 
-    this.updateDatabase(this.props)    
+    this.updateDatabase(this.props)
 
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
@@ -382,14 +382,14 @@ class Table extends Component {
     let winner = ''
     if(p1Hand.value > p2Hand.value){
       winner = this.props.players[0].name + ' wins the pot\n'
-      this.props.onWonPot(this.props.players[0], this.props.pot)
+      this.props.onIncreaseChipCount(this.props.players[0], this.props.pot)
     }else if(p2Hand.value > p1Hand.value){
       winner = this.props.players[1].name + ' wins the pot\n'
-      this.props.onWonPot(this.props.players[1], this.props.pot)
+      this.props.onIncreaseChipCount(this.props.players[1], this.props.pot)
     }else{
       winner = 'Draw'
-      this.props.onWonPot(this.props.players[0], this.props.pot/2)
-      this.props.onWonPot(this.props.players[1], this.props.pot/2)
+      this.props.onIncreaseChipCount(this.props.players[0], this.props.pot/2)
+      this.props.onIncreaseChipCount(this.props.players[1], this.props.pot/2)
     }
 
     let status = {
@@ -505,9 +505,9 @@ const mapActionsToProps = {
   onUpdatePlayersTurn: updatePlayersTurn,
   onUpdateBet: updateBet,
   onUpdateLastMove: updateLastMove,
-  onUpdateChipCount: updateChipCount,
+  onDecreaseChipCount: decreaseChipCount,
   onUpdatePot: updatePot,
-  onWonPot: wonPot,
+  onIncreaseChipCount: increaseChipCount,
   onResetFlop: resetFlop,
   onUpdateGameId: updateGameId,
   onUpdatePlayerId: updatePlayerId,

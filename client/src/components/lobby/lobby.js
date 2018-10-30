@@ -109,7 +109,8 @@ class Lobby extends Component {
       folded: false,
       hasDealerChip: true,
       playersTurn: playersTurn,
-      chipCount: 200
+      chipCount: 200,
+      betAmountSoFar: 0
     }
     this.props.onUpdatePlayer([player])
   }
