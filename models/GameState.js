@@ -19,7 +19,8 @@ const GameStateSchema = new Schema({
     "default": []
   },
   bet: {
-    type: Number
+    type: Object,
+    "default": {}
   },
   lastMove: {
     type: String
