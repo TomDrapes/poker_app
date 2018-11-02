@@ -11,7 +11,7 @@ import { connect } from 'react-redux'
 import { updateDeck } from '../../Actions/DeckActions'
 import { updateFlop, resetFlop } from '../../Actions/FlopActions'
 import { updatePlayer, updatePlayersTurn, decreaseChipCount, increaseChipCount, updateBetAmountSoFar } from '../../Actions/PlayersActions'
-import { updateBet } from '../../Actions/BetActions'
+import { updateMinimumBet, updateTotalBetsRequired } from '../../Actions/BetActions'
 import { updateLastMove } from '../../Actions/MoveActions'
 import { updatePot } from '../../Actions/PotActions'
 import { updateGameId, updatePlayerId, updateDB } from '../../Actions/LocalStateActions'
@@ -22,7 +22,8 @@ class Table extends Component {
     super(props)
 
     this.state = {
-      betAmount: this.props.currentBet,
+      betAmountIndicator: this.props.bet.totalRequired,
+      totalBetsMade: 0,
       loading: true,
       socket: this.props.socket,
       flop: 0,
@@ -42,7 +43,8 @@ class Table extends Component {
     console.log('receiving on socket')
     axios.get(`/api/gamestate/${this.props.localState.gameId}`)
       .then(res => {
-        this.props.onUpdateBet(res.data.bet)
+        this.props.onUpdateTotalBetsRequired(res.data.bet.totalRequired)
+        this.props.onUpdateMinimumBet(res.data.bet.minimum)
         this.props.onUpdatePlayer(res.data.players)
         this.props.onUpdateFlop(res.data.flop)
         this.props.onUpdateLastMove(res.data.lastMove)
@@ -75,7 +77,11 @@ class Table extends Component {
 
   /* Update current bet amount in local state if opponent raises */
   componentWillReceiveProps(nextProps){
-    this.setState({ betAmount: this.props.currentBet })
+    if(this.props.lastMove === 'raised'){
+      this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
+    }else{
+      this.setState({ betAmountIndicator: this.props.bet.minimum})
+    }
     if(nextProps.localState.updateDB){
       this.updateDatabase(nextProps)
       this.props.onUpdateDB(false)
@@ -164,7 +170,8 @@ class Table extends Component {
         this.props.onUpdatePlayer(res.data.players)
         this.props.onUpdateDeck(res.data.deck)
         this.props.onUpdateFlop(res.data.flop)
-        this.props.onUpdateBet(res.data.bet)
+        this.props.onUpdateTotalBetsRequired(res.data.bet.totalRequired)
+        this.props.onUpdateMinimumBet(res.data.bet.minimum)
         this.props.onUpdateLastMove(res.data.lastMove)
         this.props.onUpdatePot(res.data.pot)
         this.setState({ loading: false })
@@ -176,7 +183,7 @@ class Table extends Component {
     let gameState = {
       _id: nextProps.localState.gameId,
       players: nextProps.players,
-      bet: nextProps.currentBet,
+      bet: nextProps.bet,
       pot:nextProps.pot,
       flop: nextProps.flop,
       deck: nextProps.deck,
@@ -197,7 +204,7 @@ class Table extends Component {
       _id: this.props.localState.gameId,
       players: this.props.players,
       flop: [],
-      bet: 10,
+      bet: { minimum: 10, totalRequired: 0 },
       lastMove: '',
       pot: 0,
       deck: this.props.localState.deck.map(card => card.key),
@@ -277,18 +284,18 @@ class Table extends Component {
 
   /* Increment bet amount and update local state */
   increaseBet (player) {
-    if (player.chipCount - (this.state.betAmount + 10) >= 0) {
+    if (player.chipCount - (this.state.betAmountIndicator + 10) >= 0) {
       this.setState({
-        betAmount: this.state.betAmount + 10
+        betAmountIndicator: this.state.betAmountIndicator + 10
       })
     }
   }
 
   /* Decrement bet amount and update local state */
   decreaseBet () {
-    if (this.state.betAmount - 10 >= this.props.currentBet) {
+    if (this.state.betAmountIndicator - 10 >= this.props.bet.totalRequired - this.state.totalBetsMade) {
       this.setState({
-        betAmount: this.state.betAmount - 10
+        betAmountIndicator: this.state.betAmountIndicator - 10
       })
     }
   }
@@ -297,33 +304,40 @@ class Table extends Component {
   bet (player) {
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
+    
+    let amountBet = this.state.totalBetsMade + this.state.betAmountIndicator
 
     // No moves made yet so player can only bet
     if (this.props.lastMove !== 'called' && this.props.lastMove !== 'raised' &&
       this.props.lastMove !== 'bet') {
       this.props.onUpdateLastMove('bet')
-      this.props.onDecreaseChipCount(player, this.state.betAmount)
-      this.props.onUpdateBet(this.state.betAmount)
-      this.props.onUpdatePot(this.props.pot + this.state.betAmount)
-      this.updateLastMove(`${this.playersName()} bet ${this.state.betAmount}`)
+      this.setState({ totalBetsMade: amountBet })
+      this.props.onDecreaseChipCount(player, this.state.betAmountIndicator)
+      this.props.onUpdateTotalBetsRequired(amountBet)
+      this.props.onUpdateMinimumBet(this.state.betAmountIndicator)
+      this.props.onUpdatePot(this.props.pot + this.state.betAmountIndicator)
+      this.updateLastMove(`${this.playersName()} bet ${this.state.betAmountIndicator}`)
       this.props.onUpdateDB(true)
 
     // Last Move was a bet/raise and player calling
-    } else if ((this.state.betAmount === this.props.currentBet && this.props.lastMove === 'bet') ||
-    (this.state.betAmount === this.props.currentBet && this.props.lastMove === 'raised')) {
+    } else if ((amountBet === this.props.bet.totalRequired && this.props.lastMove === 'bet') 
+    || (amountBet === this.props.bet.totalRequired && this.props.lastMove === 'raised')) {
       this.props.onUpdateLastMove('called')
-      this.props.onDecreaseChipCount(player, this.props.currentBet)
-      this.props.onUpdatePot(this.props.pot + this.state.betAmount)
-      this.updateLastMove(`${this.playersName()} called ${this.state.betAmount}`)
+      this.setState({ totalBetsMade: amountBet })
+      this.props.onDecreaseChipCount(player, this.state.betAmountIndicator)
+      this.props.onUpdatePot(this.props.pot + this.state.betAmountIndicator)
+      this.updateLastMove(`${this.playersName()} called ${this.state.betAmountIndicator}`)
       this.props.onUpdateDB(true)
 
     // Last move was a bet and player is raising
-    } else if (this.props.lastMove === 'bet' && this.state.betAmount > this.props.currentBet) {
-      this.props.onUpdateBet(this.state.betAmount)
+    } else if (this.props.lastMove === 'bet' && amountBet > this.props.bet.totalRequired) {
+      this.setState({ totalBetsMade: amountBet })
+      this.props.onUpdateTotalBetsRequired(amountBet)
+      this.props.onUpdateMinimumBet(this.state.betAmountIndicator)
       this.props.onUpdateLastMove('raised')
-      this.props.onDecreaseChipCount(player, this.state.betAmount)
-      this.props.onUpdatePot(this.props.pot + this.state.betAmount)
-      this.updateLastMove(`${this.playersName()} raised the bet to ${this.state.betAmount}`)
+      this.props.onDecreaseChipCount(player, this.state.betAmountIndicator)
+      this.props.onUpdatePot(this.props.pot + this.state.betAmountIndicator)
+      this.updateLastMove(`${this.playersName()} raised the bet to ${this.state.betAmountIndicator}`)
       this.props.onUpdateDB(true)
     }
   }
@@ -337,9 +351,9 @@ class Table extends Component {
       }
     }
     // Revert bet amount back to start state locally and in store */
-    this.props.onUpdateBet(10)
+    this.props.onUpdateMinimumBet(10)
     this.setState({
-      betAmount: 10
+      betAmountIndicator: 10
     })
     // Update state in store
     this.props.onUpdateLastMove('folded')
@@ -408,7 +422,7 @@ class Table extends Component {
 
   nextRound () {
     this.props.onUpdateLastMove('round_completed')
-    this.props.onUpdateBet(10)
+    this.props.onUpdateMinimumBet(10)
     this.props.onUpdatePot(0)
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
@@ -461,8 +475,8 @@ class Table extends Component {
             <Player
               player={this.props.players[this.props.localState.playerId-1]}
               deck={this.props.localState.deck}
-              betAmount={this.state.betAmount}
-              currentBet={this.props.currentBet}
+              betAmount={this.state.betAmountIndicator}
+              currentBet={this.props.bet.totalRequired}
               lastMove={this.props.lastMove}
               fold={(player) => this.fold(player)}
               bet={(player) => this.bet(player)}
@@ -490,7 +504,7 @@ const mapStateToProps = (state) => {
     players: state.players,
     deck: state.deck,
     flop: state.flop,
-    currentBet: state.bet,
+    bet: state.bet,
     lastMove: state.lastMove,
     pot: state.pot,
     localState: state.localState
@@ -503,7 +517,8 @@ const mapActionsToProps = {
   onUpdateFlop: updateFlop,
   onUpdatePlayer: updatePlayer,
   onUpdatePlayersTurn: updatePlayersTurn,
-  onUpdateBet: updateBet,
+  onUpdateMinimumBet: updateMinimumBet,
+  onUpdateTotalBetsRequired: updateTotalBetsRequired,
   onUpdateLastMove: updateLastMove,
   onDecreaseChipCount: decreaseChipCount,
   onUpdatePot: updatePot,

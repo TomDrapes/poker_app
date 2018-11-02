@@ -1,8 +1,16 @@
-export const UPDATE_BET = 'updateBet'
+export const UPDATE_MINIMUM_BET = 'updateMinimumBet'
+export const UPDATE_TOTAL_BET_REQUIRED = 'updateTotalBetRequired'
 
-export function updateBet (raisedBet) {
+export function updateMinimumBet (raisedBet) {
   return {
-    type: UPDATE_BET,
-    payload: raisedBet
+    type: UPDATE_MINIMUM_BET,
+    payload: { minimum: raisedBet }
+  }
+}
+
+export function updateTotalBetsRequired (updatedBetAmount) {
+  return {
+    type: UPDATE_TOTAL_BET_REQUIRED,
+    payload: { totalRequired: updatedBetAmount }
   }
 }

@@ -100,7 +100,7 @@ const store = createStore(
     players: [],
     deck: [],
     flop: [],
-    bet: 10,
+    bet: { minimum: 10, totalRequired: 0 },
     lastMove: '',
     pot: 0,
     messages: []
