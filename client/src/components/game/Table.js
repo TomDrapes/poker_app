@@ -76,7 +76,7 @@ class Table extends Component {
   }
 
   /* Update current bet amount in local state if opponent raises */
-  componentWillReceiveProps(nextProps){
+  /*componentWillReceiveProps(nextProps){
     if(this.props.lastMove === 'raised'){
       this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
     }else{
@@ -86,7 +86,7 @@ class Table extends Component {
       this.updateDatabase(nextProps)
       this.props.onUpdateDB(false)
     }
-  }
+  }*/
 
   /* When component mounts there are 3 cases:
     1: Mounting for player 1 in which case new game state is created and then wait for player 2
@@ -120,9 +120,7 @@ class Table extends Component {
             .catch(err => console.log(err))
 
           this.sendSocketIO('new_game')
-          this.setState({
-            loading: false
-          })
+          this.setState({ loading: false })
         }).catch(err => console.log(err))
     }else if(window.location.pathname === `/game/${localStorage.getItem('gameId')}`){
       this.retrieveLocalStorage()
@@ -135,7 +133,7 @@ class Table extends Component {
 
     if (this.timeToShowCards(prevProps)) {
       this.showCards(prevState)
-    } else if (this.props.lastMove === 'called') {
+    } else if (this.props.lastMove === 'called' && prevProps.lastMove !== 'called') {
       this.flop()
     } else if (this.props.lastMove === 'folded') {
       this.shuffle(this.props.deck)
@@ -151,6 +149,17 @@ class Table extends Component {
         showHand: false,
         lastMove: ''
       })
+    }
+    
+    if(this.props.lastMove === 'raised'){
+      this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
+    }else{
+      this.setState({ betAmountIndicator: this.props.bet.minimum})
+    }
+
+    if(this.props.localState.updateDB){
+      this.updateDatabase(this.props)
+      this.props.onUpdateDB(false)
     }
   }
 
@@ -375,13 +384,20 @@ class Table extends Component {
   // Conditions for when to show cards
   timeToShowCards(prevProps) {
     return (
-      (this.props.lastMove === 'both_checked'
+      /*(this.props.lastMove === 'both_checked'
       && this.state.flop === 6
       && prevProps.lastMove !== 'show_cards'
       && prevProps.lastMove !== 'both_checked')
       ||
       (this.props.lastMove === 'called'
-      && this.state.flop === 5)
+      && this.state.flop === 5)*/
+      (this.props.lastMove === 'both_checked' && this.props.flop.length === 5
+      && prevProps.lastMove !== 'show_cards'
+      && prevProps.lastMove !== 'both_checked')
+      ||
+      (this.props.lastMove === 'called' && this.props.flop.length === 5
+      && prevProps.lastMove !== 'show_cards'
+      && prevProps.lastMove !== 'called')
     )
   }
 
