@@ -52,6 +52,26 @@ const straight = [
   { card: <Card key={42} image={require('../../images/cards/QUEEN-S.png')} />, value: 12, suit: 'SPADES', key: 42 }
 ]
 
+const straightContainingAPair = [
+  { card: <Card key={52} image={require('../../images/cards/2-S.png')} />, value: 2, suit: 'SPADES', key: 52 },
+  { card: <Card key={38} image={require('../../images/cards/3-C.png')} />, value: 3, suit: 'CLUBS', key: 38 },
+  { card: <Card key={24} image={require('../../images/cards/4-D.png')} />, value: 4, suit: 'DIAMONDS', key: 24 },
+  { card: <Card key={10} image={require('../../images/cards/5-H.png')} />, value: 5, suit: 'HEARTS', key: 10 },
+  { card: <Card key={9} image={require('../../images/cards/6-H.png')} />, value: 6, suit: 'HEARTS', key: 9 },
+  { card: <Card key={25} image={require('../../images/cards/3-D.png')} />, value: 3, suit: 'DIAMONDS', key: 25 },
+  { card: <Card key={42} image={require('../../images/cards/QUEEN-S.png')} />, value: 12, suit: 'SPADES', key: 42 }
+]
+
+const straightContainingTwoPair = [
+  { card: <Card key={52} image={require('../../images/cards/2-S.png')} />, value: 2, suit: 'SPADES', key: 52 },
+  { card: <Card key={38} image={require('../../images/cards/3-C.png')} />, value: 3, suit: 'CLUBS', key: 38 },
+  { card: <Card key={24} image={require('../../images/cards/4-D.png')} />, value: 4, suit: 'DIAMONDS', key: 24 },
+  { card: <Card key={10} image={require('../../images/cards/5-H.png')} />, value: 5, suit: 'HEARTS', key: 10 },
+  { card: <Card key={9} image={require('../../images/cards/6-H.png')} />, value: 6, suit: 'HEARTS', key: 9 },
+  { card: <Card key={25} image={require('../../images/cards/3-D.png')} />, value: 3, suit: 'DIAMONDS', key: 25 },
+  { card: <Card key={39} image={require('../../images/cards/2-C.png')} />, value: 2, suit: 'CLUBS', key: 39 }
+]
+
 const fourOfAKind = [
   { card: <Card key={52} image={require('../../images/cards/2-S.png')} />, value: 2, suit: 'SPADES', key: 52 },
   { card: <Card key={39} image={require('../../images/cards/2-C.png')} />, value: 2, suit: 'CLUBS', key: 39 },
@@ -182,6 +202,14 @@ test('isFullHouse() detects full house', () => {
 
 test('isStraight() detects straight', () => {
   expect(algos.isStraight(sortHand(straight))).toBe(true)
+})
+
+test('isStraight() detects straight when hand also contains a pair', () => {
+  expect(algos.isStraight(sortHand(straightContainingAPair))).toBe(true)
+})
+
+test('isStraight() detects straight when hand also contains two pair', () => {
+  expect(algos.isStraight(sortHand(straightContainingTwoPair))).toBe(true)
 })
 
 test('isOfAKind() detects four of a kind', () => {
