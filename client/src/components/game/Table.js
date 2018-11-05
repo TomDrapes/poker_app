@@ -480,7 +480,6 @@ class Table extends Component {
               player={this.props.players[this.props.localState.playerId-1]}
               deck={this.props.localState.deck}
               betAmount={this.state.betAmountIndicator}
-              currentBet={this.props.bet.totalRequired}
               lastMove={this.props.lastMove}
               fold={(player) => this.fold(player)}
               bet={(player) => this.bet(player)}

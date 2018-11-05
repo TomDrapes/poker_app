@@ -21,7 +21,7 @@ export default class Player extends Component {
         <button className="checkBtn" disabled>CHECK</button>
         <button className="foldBtn" disabled>FOLD</button>
         <button type="button" className="betBtn" disabled>BET</button>
-        <div className="betAmountWaiting">{this.props.currentBet}</div>
+        <div className="betAmountWaiting">{this.props.betAmount}</div>
       </div>
     )
   }
