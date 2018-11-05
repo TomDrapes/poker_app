@@ -300,7 +300,10 @@ class Table extends Component {
     }
   }
 
-  /* Makes a bet move */
+  /* 
+    Makes a bet move 
+    The bet button has 3 functions ie. Bet, Raise and Call    
+  */
   bet (player) {
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
@@ -319,7 +322,7 @@ class Table extends Component {
       this.updateLastMove(`${this.playersName()} bet ${this.state.betAmountIndicator}`)
       this.props.onUpdateDB(true)
 
-    // Last Move was a bet/raise and player calling
+    // Last Move was a bet/raise and player is calling
     } else if ((amountBet === this.props.bet.totalRequired && this.props.lastMove === 'bet') 
     || (amountBet === this.props.bet.totalRequired && this.props.lastMove === 'raised')) {
       this.props.onUpdateLastMove('called')
@@ -329,8 +332,9 @@ class Table extends Component {
       this.updateLastMove(`${this.playersName()} called ${this.state.betAmountIndicator}`)
       this.props.onUpdateDB(true)
 
-    // Last move was a bet and player is raising
-    } else if (this.props.lastMove === 'bet' && amountBet > this.props.bet.totalRequired) {
+    // Last move was a bet/raise and player is raising
+    } else if ((this.props.lastMove === 'bet' && amountBet > this.props.bet.totalRequired)
+    || (this.props.lastMove === 'raised' && amountBet > this.props.bet.totalRequired)) {
       this.setState({ totalBetsMade: amountBet })
       this.props.onUpdateTotalBetsRequired(amountBet)
       this.props.onUpdateMinimumBet(this.state.betAmountIndicator)
