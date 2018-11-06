@@ -33,7 +33,6 @@ class Table extends Component {
     }
 
     this.state.socket.on('new_state_available', (opp_move) => {
-      console.log("Updating state...\n");
       this.receiveSocketIO(opp_move);
     })
   }
@@ -64,7 +63,7 @@ class Table extends Component {
   sendSocketIO = (msg) => {
     console.log('sending on socket')
     switch(msg) {
-      case 'new_game':
+      case 'new_game': //TODO: I think I can remove this since no longer being used
         this.state.socket.emit('game_created', this.state.lastMove)
         break;
       case 'state_updated':
@@ -77,6 +76,7 @@ class Table extends Component {
 
   /* Update current bet amount in local state if opponent raises */
   /*componentWillReceiveProps(nextProps){
+    console.log("componentWillReceiveProps: updateDB = " + nextProps.localState.updateDB)
     if(this.props.lastMove === 'raised'){
       this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
     }else{
@@ -94,6 +94,7 @@ class Table extends Component {
     3: Returning to game after closing tab - retrieve data from localStorage to then perform http request for game data
   */
   componentDidMount(){
+    console.log('componentDidMount')
     if(this.props.localState.playerId === 1){
       this.saveStateLocally()
       this.createNewGame();
@@ -116,10 +117,10 @@ class Table extends Component {
           }
 
           axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
-            .then(res => console.log(res))
+            //.then(res => console.log(res))
             .catch(err => console.log(err))
 
-          this.sendSocketIO('new_game')
+          //this.sendSocketIO('new_game')
           this.setState({ loading: false })
         }).catch(err => console.log(err))
     }else if(window.location.pathname === `/game/${localStorage.getItem('gameId')}`){
@@ -130,34 +131,32 @@ class Table extends Component {
 
   /* When component updates check what the last move was and handle accordingly */
   componentDidUpdate (prevProps, prevState) {
-
+    
     if (this.timeToShowCards(prevProps)) {
+      console.log('time to show cards')
       this.showCards(prevState)
     } else if (this.props.lastMove === 'called' && prevProps.lastMove !== 'called') {
+      console.log('after called')
       this.flop()
     } else if (this.props.lastMove === 'folded') {
+      console.log('after folded')
       this.shuffle(this.props.deck)
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
     }else if (this.props.lastMove === 'round_completed'){
+      console.log('after round complete')
       if(this.props.players[this.props.localState.playerId-1].playersTurn){
         this.shuffle(this.props.deck)
       }
     }else if(this.props.lastMove === 'dealt' && prevProps.lastMove !== 'dealt'){
+      console.log('after deal')
       this.setState({
         flop: 0,
         showHand: false,
         lastMove: ''
       })
-    }
-    
-    if(this.props.lastMove === 'raised'){
-      this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
-    }else{
-      this.setState({ betAmountIndicator: this.props.bet.minimum})
-    }
-
-    if(this.props.localState.updateDB){
+    }else if(this.props.localState.updateDB){
+      console.log('time to update db')
       this.updateDatabase(this.props)
       this.props.onUpdateDB(false)
     }
@@ -201,7 +200,7 @@ class Table extends Component {
     }
     axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
       .then(res => {
-        console.log(res)
+        //console.log(res)
         this.sendSocketIO('state_updated')
       })
       .catch(err => console.log(err))
@@ -209,6 +208,7 @@ class Table extends Component {
 
   createNewGame() {
     //Create game state
+    console.log('Creating new game...')
     let newGameState = {
       _id: this.props.localState.gameId,
       players: this.props.players,
@@ -220,12 +220,13 @@ class Table extends Component {
       messages: []
     }
     axios.put(`/api/gamestate/`, newGameState)
-      .then(res => console.log(res))
+      //.then(res => console.log(res))
       .catch(err => console.log(err));
   }
 
   /* Deal two cards to each player then update state in store */
   deal () {
+    console.log("deal")
     const p = this.props.players.map(player => { return {...player, hand: []} })
     let deck = this.props.deck
     for (let i = 0; i < this.props.players.length; i++) {
@@ -242,6 +243,7 @@ class Table extends Component {
   }
 
   shuffle (deck) {
+    console.log('shuffle')
     // Return flop cards to deck
     let d = deck
     for (let i = 0; i < this.props.flop.length; i++) {
@@ -270,7 +272,7 @@ class Table extends Component {
       this.props.onUpdateDeck(deck)
       this.props.onUpdateFlop(flop)
       this.props.onUpdateLastMove('flopped')
-      this.props.onUpdateDB(true)
+      //this.props.onUpdateDB(true)
     }
   }
 
@@ -282,6 +284,7 @@ class Table extends Component {
       this.props.onUpdatePlayersTurn(this.props.players[0])
       this.props.onUpdateLastMove('both_checked')
       this.flop()
+      this.props.onUpdateDB(true)
     } else {
       this.setState({ flop: this.state.flop + 1 })
       this.props.onUpdateLastMove('checked')
@@ -384,13 +387,6 @@ class Table extends Component {
   // Conditions for when to show cards
   timeToShowCards(prevProps) {
     return (
-      /*(this.props.lastMove === 'both_checked'
-      && this.state.flop === 6
-      && prevProps.lastMove !== 'show_cards'
-      && prevProps.lastMove !== 'both_checked')
-      ||
-      (this.props.lastMove === 'called'
-      && this.state.flop === 5)*/
       (this.props.lastMove === 'both_checked' && this.props.flop.length === 5
       && prevProps.lastMove !== 'show_cards'
       && prevProps.lastMove !== 'both_checked')
@@ -398,13 +394,17 @@ class Table extends Component {
       (this.props.lastMove === 'called' && this.props.flop.length === 5
       && prevProps.lastMove !== 'show_cards'
       && prevProps.lastMove !== 'called')
+      ||
+      (this.props.lastMove === 'show_cards' && prevProps.lastMove !== 'show_cards'
+      && prevProps.lastMove !== 'both_checked'
+      && prevProps.lastMove !== 'called')
     )
   }
 
   /* When both players call, show cards and determine winner */
   showCards () {
 
-    this.updateDatabase(this.props)
+    //this.updateDatabase(this.props)
 
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
