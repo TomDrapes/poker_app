@@ -22,7 +22,7 @@ class Table extends Component {
     super(props)
 
     this.state = {
-      betAmountIndicator: this.props.bet.totalRequired,
+      betAmountIndicator: this.props.bet.minimum,
       totalBetsMade: 0,
       loading: true,
       socket: this.props.socket,
@@ -53,6 +53,7 @@ class Table extends Component {
           loading: false,
           lastMove: opponents_move
         })
+        console.log(res.data.lastMove)
       })
       .catch(err => {
         console.log(err)
@@ -137,6 +138,7 @@ class Table extends Component {
       this.showCards(prevState)
     } else if (this.props.lastMove === 'called' && prevProps.lastMove !== 'called') {
       console.log('after called')
+      this.setState({ betAmountIndicator: this.props.bet.minimum})
       this.flop()
     } else if (this.props.lastMove === 'folded') {
       console.log('after folded')
@@ -159,6 +161,13 @@ class Table extends Component {
       console.log('time to update db')
       this.updateDatabase(this.props)
       this.props.onUpdateDB(false)
+    }else if(this.props.lastMove === 'flopped'){
+      console.log('after flop')
+      this.setState({ betAmountIndicator: this.props.bet.minimum})
+      this.props.onUpdateLastMove('waiting')
+    }else if(this.props.lastMove === 'raised'){
+      this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
+      this.props.onUpdateLastMove('re-raised')
     }
   }
 
@@ -324,7 +333,7 @@ class Table extends Component {
 
     // No moves made yet so player can only bet
     if (this.props.lastMove !== 'called' && this.props.lastMove !== 'raised' &&
-      this.props.lastMove !== 'bet') {
+      this.props.lastMove !== 'bet' && this.props.lastMove !== 're-raised') {
       this.props.onUpdateLastMove('bet')
       this.setState({ totalBetsMade: amountBet })
       this.props.onDecreaseChipCount(player, this.state.betAmountIndicator)
@@ -336,7 +345,8 @@ class Table extends Component {
 
     // Last Move was a bet/raise and player is calling
     } else if ((amountBet === this.props.bet.totalRequired && this.props.lastMove === 'bet') 
-    || (amountBet === this.props.bet.totalRequired && this.props.lastMove === 'raised')) {
+    || (amountBet === this.props.bet.totalRequired && this.props.lastMove === 'raised') 
+    || (amountBet === this.props.bet.totalRequired && this.props.lastMove === 're-raised')){
       this.props.onUpdateLastMove('called')
       this.setState({ totalBetsMade: amountBet })
       this.props.onDecreaseChipCount(player, this.state.betAmountIndicator)
@@ -346,7 +356,8 @@ class Table extends Component {
 
     // Last move was a bet/raise and player is raising
     } else if ((this.props.lastMove === 'bet' && amountBet > this.props.bet.totalRequired)
-    || (this.props.lastMove === 'raised' && amountBet > this.props.bet.totalRequired)) {
+    || (this.props.lastMove === 'raised' && amountBet > this.props.bet.totalRequired)
+    || (this.props.lastMove === 're-raised' && amountBet > this.props.bet.totalRequired)) {
       this.setState({ totalBetsMade: amountBet })
       this.props.onUpdateTotalBetsRequired(amountBet)
       this.props.onUpdateMinimumBet(this.state.betAmountIndicator)
