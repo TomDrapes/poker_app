@@ -26,7 +26,7 @@ class Table extends Component {
       totalBetsMade: 0,
       loading: true,
       socket: this.props.socket,
-      flop: 0,
+      //flop: 0,
       lastMove: `It's your turn`,
       showHand: false,
       status: {}
@@ -272,8 +272,9 @@ class Table extends Component {
 
   /* Flop top card off the deck and then update state in store */
   flop () {
-    this.setState({ flop: this.state.flop + 1 })
-    if(this.state.flop < 5){
+    //this.setState({ flop: this.state.flop + 1 })
+    //if(this.state.flop < 5){
+    if (this.props.flop.length < 5){
       let flop = this.props.flop
       let deck = this.props.deck
       flop.push(deck[0])
@@ -295,7 +296,7 @@ class Table extends Component {
       this.flop()
       this.props.onUpdateDB(true)
     } else {
-      this.setState({ flop: this.state.flop + 1 })
+      //this.setState({ flop: this.state.flop + 1 })
       this.props.onUpdateLastMove('checked')
       this.props.onUpdatePlayersTurn(this.props.players[1])
       this.props.onUpdatePlayersTurn(this.props.players[0])
@@ -373,7 +374,7 @@ class Table extends Component {
   fold (player) {
     for (let i = 0; i < this.props.players.length; i++) {
       // Opponent wins the pot
-      if (this.props.players[i].name !== player.name) {
+      if (this.props.players[i].name !== player.name) { //TODO: must allow players to have duplicate names
         this.props.onIncreaseChipCount(this.props.players[i], this.props.pot)
       }
     }
