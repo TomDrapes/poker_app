@@ -26,7 +26,6 @@ class Table extends Component {
       totalBetsMade: 0,
       loading: true,
       socket: this.props.socket,
-      //flop: 0,
       lastMove: `It's your turn`,
       showHand: false,
       status: {}
@@ -64,9 +63,6 @@ class Table extends Component {
   sendSocketIO = (msg) => {
     console.log('sending on socket')
     switch(msg) {
-      case 'new_game': //TODO: I think I can remove this since no longer being used
-        this.state.socket.emit('game_created', this.state.lastMove)
-        break;
       case 'state_updated':
         this.state.socket.emit('state_updated', this.state.lastMove)
         break;
@@ -74,20 +70,6 @@ class Table extends Component {
         console.log("Error: /Table.js sendSocketIO")
     }
   }
-
-  /* Update current bet amount in local state if opponent raises */
-  /*componentWillReceiveProps(nextProps){
-    console.log("componentWillReceiveProps: updateDB = " + nextProps.localState.updateDB)
-    if(this.props.lastMove === 'raised'){
-      this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
-    }else{
-      this.setState({ betAmountIndicator: this.props.bet.minimum})
-    }
-    if(nextProps.localState.updateDB){
-      this.updateDatabase(nextProps)
-      this.props.onUpdateDB(false)
-    }
-  }*/
 
   /* When component mounts there are 3 cases:
     1: Mounting for player 1 in which case new game state is created and then wait for player 2
@@ -121,7 +103,6 @@ class Table extends Component {
             //.then(res => console.log(res))
             .catch(err => console.log(err))
 
-          //this.sendSocketIO('new_game')
           this.setState({ loading: false })
         }).catch(err => console.log(err))
     }else if(window.location.pathname === `/game/${localStorage.getItem('gameId')}`){
@@ -272,8 +253,6 @@ class Table extends Component {
 
   /* Flop top card off the deck and then update state in store */
   flop () {
-    //this.setState({ flop: this.state.flop + 1 })
-    //if(this.state.flop < 5){
     if (this.props.flop.length < 5){
       let flop = this.props.flop
       let deck = this.props.deck
@@ -282,7 +261,6 @@ class Table extends Component {
       this.props.onUpdateDeck(deck)
       this.props.onUpdateFlop(flop)
       this.props.onUpdateLastMove('flopped')
-      //this.props.onUpdateDB(true)
     }
   }
 
@@ -296,7 +274,6 @@ class Table extends Component {
       this.flop()
       this.props.onUpdateDB(true)
     } else {
-      //this.setState({ flop: this.state.flop + 1 })
       this.props.onUpdateLastMove('checked')
       this.props.onUpdatePlayersTurn(this.props.players[1])
       this.props.onUpdatePlayersTurn(this.props.players[0])
@@ -415,8 +392,6 @@ class Table extends Component {
 
   /* When both players call, show cards and determine winner */
   showCards () {
-
-    //this.updateDatabase(this.props)
 
     let p1Hand = determineBestHand(
       this.props.players[0].hand, this.props.flop, this.props.localState.deck
