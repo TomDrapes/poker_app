@@ -121,7 +121,8 @@ class Table extends Component {
       console.log('after deal')
       this.setState({
         flop: 0,
-        showHand: false
+        showHand: false,
+        betAmountIndicator: 10
       })
     }else if(this.props.localState.updateDB){
       console.log('time to update db')
@@ -134,6 +135,8 @@ class Table extends Component {
     }else if(this.props.lastMove === 'raised'){
       this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade })
       this.props.onUpdateLastMove('re-raised')
+    }else if(this.props.lastMove === 'bet' && prevProps.lastMove !== 'bet') {
+      this.setState({ betAmountIndicator: this.props.bet.totalRequired - this.state.totalBetsMade})
     }
   }
 
@@ -423,6 +426,7 @@ class Table extends Component {
       showHand: false,
       flop: 0,
       lastMove: `IT'S YOUR TURN`
+
     })
   }
 
