@@ -30,6 +30,8 @@
 
 .oppSide {
   align-self: flex-end;
+  flex-grow: 1;
+  flex-shrink: 0;
 }
 
 .oppName{
@@ -47,6 +49,8 @@
   text-align: center;
   align-self: flex-start;
   margin-left: 80px;
+  flex-grow: 1;
+  flex-shrink: 0;
 }
 
 .chipCount {
@@ -62,7 +66,8 @@
   justify-self: flex-end;
   display: flex;
   align-items: center;
-
+  flex-grow: 1;
+  flex-shrink: 0;
 }
 
 .clear{
@@ -188,12 +193,17 @@
   color: white;
   margin-left: 10px;
   align-self: flex-start;
+  flex-grow: 1;
+  flex-shrink: 0;
 }
 
 .status {
   color: white;
-  margin-left: 10px;
-  align-self: flex-start;
+  background-color: #000;
+  width: 100%;
+  padding-left: 5px;
+  align-self: flex-end;
+  flex-shrink: 0;
 }
 
 .overlay-container {
@@ -216,6 +226,8 @@
   justify-content: center;
   font-size: 28px;
   flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 0;
 }
 
 .winner {

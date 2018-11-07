@@ -26,7 +26,7 @@ class Table extends Component {
       totalBetsMade: 0,
       loading: true,
       socket: this.props.socket,
-      lastMove: `It's your turn`,
+      lastMove: `IT'S YOUR TURN`,
       showHand: false,
       status: {}
     }
@@ -80,29 +80,15 @@ class Table extends Component {
     console.log('componentDidMount')
     if(this.props.localState.playerId === 1){
       this.saveStateLocally()
-      this.createNewGame();
+      this.createNewGame();      
     }else if(this.props.localState.playerId === 2){
       this.saveStateLocally()
       axios.get(`/api/gamestate/${this.props.localState.gameId}`)
         .then(res => {
           let p = res.data.players
           p.push(this.props.players[0])
-
           this.props.onUpdatePlayer(p)
-
           this.shuffle(res.data.deck)
-
-          let gameState = {
-            ...res.data,
-            players: this.props.players,
-            lastMove: this.props.lastMove,
-            deck: this.props.deck
-          }
-
-          axios.put(`/api/gamestate/${this.props.localState.gameId}`, gameState)
-            //.then(res => console.log(res))
-            .catch(err => console.log(err))
-
           this.setState({ loading: false })
         }).catch(err => console.log(err))
     }else if(window.location.pathname === `/game/${localStorage.getItem('gameId')}`){
@@ -135,8 +121,7 @@ class Table extends Component {
       console.log('after deal')
       this.setState({
         flop: 0,
-        showHand: false,
-        lastMove: ''
+        showHand: false
       })
     }else if(this.props.localState.updateDB){
       console.log('time to update db')
@@ -370,7 +355,7 @@ class Table extends Component {
   }
 
   updateLastMove(lastMove){
-    this.setState({ lastMove: '> ' + lastMove  })
+    this.setState({ lastMove: lastMove })
   }
 
   // Conditions for when to show cards
@@ -437,7 +422,7 @@ class Table extends Component {
     this.setState({
       showHand: false,
       flop: 0,
-      lastMove: ''
+      lastMove: `IT'S YOUR TURN`
     })
   }
 
@@ -463,11 +448,6 @@ class Table extends Component {
 
         { !this.state.loading &&
           <div className="gameWindow">
-
-            <StatusMessage
-              player={this.props.players[this.props.localState.playerId-1]}
-              opponent={this.props.players[this.opponent()]}
-            />
 
             <div className="pot">Pot: {this.props.pot}</div>
 
@@ -496,6 +476,13 @@ class Table extends Component {
               showOverlay={this.state.showHand}
               nextRound={() => this.nextRound()}
             />
+
+            <StatusMessage
+              player={this.props.players[this.props.localState.playerId-1]}
+              opponent={this.props.players[this.opponent()]}
+              message={this.state.lastMove}
+            />
+
           </div>
         }
       </div>

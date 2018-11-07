@@ -4,9 +4,9 @@ export default class StatusMessage extends Component {
 
   message() {
     if(this.props.player.playersTurn){
-      return <div>Your turn.</div>
+      return <div>{this.props.message.toUpperCase()}</div>
     }else if(this.props.opponent){
-      return <div><i className="fa fa-spinner fa-spin"></i> Waiting for {this.props.opponent.name}</div>
+      return <div><i className="fa fa-spinner fa-spin"></i> WAITING FOR {this.props.opponent.name.toUpperCase()}</div>
     }
   }
   render() {
