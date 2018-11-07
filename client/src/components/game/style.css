@@ -191,10 +191,15 @@
 
 .pot {
   color: white;
-  margin-left: 10px;
+  margin-left: 15px;
   align-self: flex-start;
   flex-grow: 1;
   flex-shrink: 0;
+  font-size: 22px;
+}
+
+.pot-image {
+  margin-right: 10px;
 }
 
 .status {

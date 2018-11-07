@@ -449,7 +449,10 @@ class Table extends Component {
         { !this.state.loading &&
           <div className="gameWindow">
 
-            <div className="pot">Pot: {this.props.pot}</div>
+            <div className="pot">
+              <img className='pot-image' src={require('../../images/pot.png')} height='50' width='50' alt="poker chip"/> 
+              {this.props.pot}
+            </div>
 
             <Opponent
               player={this.props.players[this.opponent()]}
