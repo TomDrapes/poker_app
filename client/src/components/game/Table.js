@@ -112,17 +112,16 @@ class Table extends Component {
       this.shuffle(this.props.deck)
     } else if (this.props.lastMove === 'shuffled') {
       this.deal()
-    }else if (this.props.lastMove === 'round_completed'){
+    }else if (this.props.lastMove === 'round_completed'
+    && this.props.players[this.props.localState.playerId-1].playersTurn){
       console.log('after round complete')
-      if(this.props.players[this.props.localState.playerId-1].playersTurn){
-        this.shuffle(this.props.deck)
-      }
+      this.shuffle(this.props.deck)
     }else if(this.props.lastMove === 'dealt' && prevProps.lastMove !== 'dealt'){
       console.log('after deal')
       this.setState({
-        flop: 0,
         showHand: false,
-        betAmountIndicator: 10
+        betAmountIndicator: 10,
+        lastMove: `IT'S YOUR TURN`
       })
     }else if(this.props.localState.updateDB){
       console.log('time to update db')
@@ -216,7 +215,6 @@ class Table extends Component {
     this.props.onUpdateDeck(deck)
     this.props.onUpdatePlayer(p)
     this.props.onUpdateLastMove('dealt')
-    this.setState({ flop: 0 })
     this.props.onUpdateDB(true)
   }
 
@@ -421,13 +419,6 @@ class Table extends Component {
     this.props.onUpdatePot(0)
     this.props.onUpdatePlayersTurn(this.props.players[1])
     this.props.onUpdatePlayersTurn(this.props.players[0])
-
-    this.setState({
-      showHand: false,
-      flop: 0,
-      lastMove: `IT'S YOUR TURN`
-
-    })
   }
 
   opponent(){
